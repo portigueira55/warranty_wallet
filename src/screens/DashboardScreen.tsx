@@ -6,7 +6,8 @@ import {
   FlatList,
   TouchableOpacity,
   RefreshControl,
-  Dimensions
+  Dimensions,
+  Alert
 } from 'react-native';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
@@ -14,6 +15,7 @@ import { useAuth } from '../context/AuthContext';
 import { TicketStorage } from '../services/storage';
 import { Ticket } from '../types';
 import { WarrantyCard } from '../components/WarrantyCard';
+import { loadSampleData } from '../utils/sampleData';
 
 const { width } = Dimensions.get('window');
 const isTablet = width >= 768;
@@ -83,6 +85,40 @@ export const DashboardScreen: React.FC = () => {
     setRefreshing(false);
   };
 
+  const handleLoadSampleData = async () => {
+    if (!user) return;
+
+    Alert.alert(
+      'Cargar datos de ejemplo',
+      '¿Deseas cargar 7 tickets de ejemplo con productos en diferentes estados de garantía (vigente, próxima a vencer y vencida)?',
+      [
+        {
+          text: 'Cancelar',
+          style: 'cancel'
+        },
+        {
+          text: 'Cargar',
+          onPress: async () => {
+            try {
+              setRefreshing(true);
+              await loadSampleData(user.id, user.tenantId);
+              await loadTickets();
+              setRefreshing(false);
+              Alert.alert(
+                'Éxito',
+                'Se han cargado 7 tickets de ejemplo con productos en diferentes estados de garantía'
+              );
+            } catch (error) {
+              console.error('Error cargando datos de ejemplo:', error);
+              setRefreshing(false);
+              Alert.alert('Error', 'No se pudieron cargar los datos de ejemplo');
+            }
+          }
+        }
+      ]
+    );
+  };
+
   const renderHeader = () => (
     <View style={styles.header}>
       {/* Saludo */}
@@ -139,6 +175,15 @@ export const DashboardScreen: React.FC = () => {
       >
         <Ionicons name="add" size={20} color="#fff" />
         <Text style={styles.addFirstButtonText}>Añadir Ticket</Text>
+      </TouchableOpacity>
+
+      {/* Botón para cargar datos de ejemplo */}
+      <TouchableOpacity
+        style={styles.sampleDataButton}
+        onPress={handleLoadSampleData}
+      >
+        <Ionicons name="albums-outline" size={18} color="#1a73e8" />
+        <Text style={styles.sampleDataButtonText}>Cargar datos de ejemplo</Text>
       </TouchableOpacity>
     </View>
   );
@@ -287,6 +332,22 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
     marginLeft: 8
+  },
+  sampleDataButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderRadius: 20,
+    marginTop: 12,
+    borderWidth: 1,
+    borderColor: '#1a73e8'
+  },
+  sampleDataButtonText: {
+    color: '#1a73e8',
+    fontSize: 14,
+    fontWeight: '500',
+    marginLeft: 6
   },
   fab: {
     position: 'absolute',

@@ -119,28 +119,56 @@ export const AddTicketScreen: React.FC = () => {
   };
 
   const addProduct = () => {
-    if (!newProductName.trim()) {
-      Alert.alert('Error', 'El nombre del producto es obligatorio');
-      return;
+    try {
+      if (!newProductName || !newProductName.trim()) {
+        Alert.alert('Error', 'El nombre del producto es obligatorio');
+        return;
+      }
+
+      // Validar y parsear precio con mejor manejo de errores
+      let price = 0;
+      if (newProductPrice && newProductPrice.trim()) {
+        const cleanPrice = newProductPrice.trim().replace(',', '.');
+        price = parseFloat(cleanPrice);
+        if (isNaN(price) || price < 0) {
+          Alert.alert('Error', 'El precio debe ser un número válido');
+          return;
+        }
+      }
+
+      // Validar cantidad
+      let qty = 1;
+      if (newProductQty && newProductQty.trim()) {
+        qty = parseInt(newProductQty);
+        if (isNaN(qty) || qty < 1) {
+          Alert.alert('Error', 'La cantidad debe ser un número mayor a 0');
+          return;
+        }
+      }
+
+      const product: Product = {
+        id: generateUniqueId(),
+        sku: newProductSku && newProductSku.trim()
+          ? newProductSku.trim()
+          : generateUniqueId().substring(0, 8).toUpperCase(),
+        name: newProductName.trim(),
+        quantity: qty,
+        unitPrice: price,
+        totalPrice: price * qty
+      };
+
+      // Usar callback para asegurar que tenemos el estado más reciente
+      setProducts(prevProducts => [...prevProducts, product]);
+
+      // Limpiar campos
+      setNewProductName('');
+      setNewProductSku('');
+      setNewProductQty('1');
+      setNewProductPrice('');
+    } catch (error) {
+      console.error('Error al añadir producto:', error);
+      Alert.alert('Error', 'No se pudo añadir el producto. Por favor, intenta de nuevo.');
     }
-
-    const price = parseFloat(newProductPrice.replace(',', '.')) || 0;
-    const qty = parseInt(newProductQty) || 1;
-
-    const product: Product = {
-      id: generateUniqueId(),
-      sku: newProductSku || generateUniqueId().substring(0, 8).toUpperCase(),
-      name: newProductName.trim(),
-      quantity: qty,
-      unitPrice: price,
-      totalPrice: price * qty
-    };
-
-    setProducts([...products, product]);
-    setNewProductName('');
-    setNewProductSku('');
-    setNewProductQty('1');
-    setNewProductPrice('');
   };
 
   const removeProduct = (productId: string) => {
