@@ -47,6 +47,11 @@
           "photosPermission": "Permitir acceso a fotos para seleccionar tickets de compra."
         }
       ]
-    ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "2d22482c"
+      }
+    }
   }
 }
