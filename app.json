@@ -46,7 +46,8 @@
         {
           "photosPermission": "Permitir acceso a fotos para seleccionar tickets de compra."
         }
-      ]
+      ],
+      "expo-font"
     ],
     "runtimeVersion": {
       "policy": "appVersion"
