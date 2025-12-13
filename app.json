@@ -48,9 +48,12 @@
         }
       ]
     ],
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
     "extra": {
       "eas": {
-        "projectId": "warranty-wallet"
+        "projectId": "60062b77-c4c5-4611-a63c-23f4565b8d98"
       }
     }
   }
