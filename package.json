@@ -33,6 +33,7 @@
     "@babel/core": "^7.24.0",
     "@types/crypto-js": "^4.2.1",
     "@types/react": "~18.2.45",
+    "pngjs": "^7.0.0",
     "typescript": "~5.3.0"
   },
   "private": true

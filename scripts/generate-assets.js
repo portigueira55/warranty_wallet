@@ -1,10 +1,11 @@
 /**
- * Script para generar assets placeholder
+ * Script para generar assets válidos
  * Ejecutar con: node scripts/generate-assets.js
  */
 
 const fs = require('fs');
 const path = require('path');
+const { PNG } = require('pngjs');
 
 const assetsDir = path.join(__dirname, '..', 'assets');
 
@@ -13,34 +14,59 @@ if (!fs.existsSync(assetsDir)) {
   fs.mkdirSync(assetsDir, { recursive: true });
 }
 
-// PNG mínimo válido (1x1 pixel azul)
-const createMinimalPNG = () => {
-  return Buffer.from([
-    0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A, // PNG signature
-    0x00, 0x00, 0x00, 0x0D, // IHDR length
-    0x49, 0x48, 0x44, 0x52, // IHDR
-    0x00, 0x00, 0x00, 0x01, // width: 1
-    0x00, 0x00, 0x00, 0x01, // height: 1
-    0x08, 0x02, // bit depth: 8, color type: 2 (RGB)
-    0x00, 0x00, 0x00, // compression, filter, interlace
-    0x90, 0x77, 0x53, 0xDE, // IHDR CRC
-    0x00, 0x00, 0x00, 0x0C, // IDAT length
-    0x49, 0x44, 0x41, 0x54, // IDAT
-    0x78, 0x9C, 0x63, 0x18, 0x73, 0xE8, 0x00, 0x00, // compressed data (blue pixel)
-    0x00, 0x05, 0x00, 0x01, // CRC placeholder
-    0x00, 0x00, 0x00, 0x00, // IEND length
-    0x49, 0x45, 0x4E, 0x44, // IEND
-    0xAE, 0x42, 0x60, 0x82  // IEND CRC
-  ]);
-};
+/**
+ * Crea una imagen PNG sólida con texto
+ */
+function createPNG(width, height, text, outputPath) {
+  const png = new PNG({ width, height });
 
-const assets = ['icon.png', 'adaptive-icon.png', 'splash.png', 'favicon.png'];
+  // Color de fondo: #1a73e8 (azul)
+  const bgColor = { r: 26, g: 115, b: 232 };
 
-assets.forEach(asset => {
-  const filePath = path.join(assetsDir, asset);
-  fs.writeFileSync(filePath, createMinimalPNG());
-  console.log(`Created: ${filePath}`);
-});
+  // Llenar con color de fondo
+  for (let y = 0; y < height; y++) {
+    for (let x = 0; x < width; x++) {
+      const idx = (width * y + x) << 2;
+      png.data[idx] = bgColor.r;
+      png.data[idx + 1] = bgColor.g;
+      png.data[idx + 2] = bgColor.b;
+      png.data[idx + 3] = 255; // alpha
+    }
+  }
 
-console.log('\nAssets generated successfully!');
-console.log('Note: Replace these with proper images for production.');
+  // Dibujar una "W" simple en el centro (para icono)
+  if (text === 'W') {
+    const centerX = Math.floor(width / 2);
+    const centerY = Math.floor(height / 2);
+    const size = Math.floor(Math.min(width, height) * 0.4);
+
+    // Dibujar un rectángulo blanco en el centro
+    const white = { r: 255, g: 255, b: 255 };
+    for (let y = centerY - size; y < centerY + size; y++) {
+      for (let x = centerX - size; x < centerX + size; x++) {
+        if (x >= 0 && x < width && y >= 0 && y < height) {
+          const idx = (width * y + x) << 2;
+          png.data[idx] = white.r;
+          png.data[idx + 1] = white.g;
+          png.data[idx + 2] = white.b;
+          png.data[idx + 3] = 255;
+        }
+      }
+    }
+  }
+
+  // Guardar PNG
+  png.pack().pipe(fs.createWriteStream(outputPath));
+  console.log(`Created: ${outputPath} (${width}x${height})`);
+}
+
+// Generar assets
+createPNG(1024, 1024, 'W', path.join(assetsDir, 'icon.png'));
+createPNG(1024, 1024, 'W', path.join(assetsDir, 'adaptive-icon.png'));
+createPNG(1284, 2778, '', path.join(assetsDir, 'splash.png'));
+createPNG(48, 48, 'W', path.join(assetsDir, 'favicon.png'));
+
+setTimeout(() => {
+  console.log('\n✅ Assets generated successfully!');
+  console.log('Note: For production, replace these with professionally designed images.');
+}, 1000);

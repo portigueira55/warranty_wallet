@@ -45,34 +45,8 @@ jobs:
       - name: Install Expo CLI
         run: npm install -g expo-cli @expo/ngrok
 
-      - name: Create assets directory
-        run: mkdir -p assets
-
-      - name: Generate placeholder assets
-        run: |
-          # Crear archivos PNG válidos mínimos
-          node -e "
-          const fs = require('fs');
-
-          // PNG mínimo 1x1 pixel azul (#1a73e8)
-          const pngHeader = Buffer.from([
-            0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A,
-            0x00, 0x00, 0x00, 0x0D, 0x49, 0x48, 0x44, 0x52,
-            0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x01,
-            0x08, 0x02, 0x00, 0x00, 0x00, 0x90, 0x77, 0x53,
-            0xDE, 0x00, 0x00, 0x00, 0x0C, 0x49, 0x44, 0x41,
-            0x54, 0x78, 0x9C, 0x63, 0x18, 0x73, 0xE8, 0x00,
-            0x00, 0x00, 0x05, 0x00, 0x01, 0x00, 0x0D, 0x0A,
-            0x2D, 0xB4, 0x00, 0x00, 0x00, 0x00, 0x49, 0x45,
-            0x4E, 0x44, 0xAE, 0x42, 0x60, 0x82
-          ]);
-
-          fs.writeFileSync('assets/icon.png', pngHeader);
-          fs.writeFileSync('assets/adaptive-icon.png', pngHeader);
-          fs.writeFileSync('assets/splash.png', pngHeader);
-          fs.writeFileSync('assets/favicon.png', pngHeader);
-          console.log('Assets created successfully');
-          "
+      - name: Verify assets exist
+        run: ls -lh assets/
 
       - name: Prebuild Android
         run: npx expo prebuild --platform android --clean
