@@ -1,4 +1,4 @@
-name: Build Android APK
+name: Build Android APK with EAS
 
 on:
   push:
@@ -14,7 +14,7 @@ on:
 
 jobs:
   build:
-    name: Build Android APK
+    name: Build Android APK with EAS
     runs-on: ubuntu-latest
 
     steps:
@@ -27,40 +27,25 @@ jobs:
           node-version: '20'
           cache: 'npm'
 
-      - name: Setup Java JDK
-        uses: actions/setup-java@v4
-        with:
-          distribution: 'temurin'
-          java-version: '17'
-
-      - name: Setup Android SDK
-        uses: android-actions/setup-android@v3
-
-      - name: Accept Android licenses
-        run: yes | sdkmanager --licenses || true
-
       - name: Install dependencies
         run: npm ci
 
-      - name: Verify android directory exists
-        run: |
-          ls -lah android/
-          echo "Android native code is pre-generated and committed to repo"
-
-      - name: Make gradlew executable
-        run: chmod +x android/gradlew
-
-      - name: Build Android APK
-        run: |
-          cd android
-          ./gradlew assembleRelease --no-daemon --warning-mode all
-
-      - name: List build outputs
-        run: find android -name "*.apk" -type f
-
-      - name: Upload APK artifact
-        uses: actions/upload-artifact@v4
+      - name: Setup EAS
+        uses: expo/expo-github-action@v8
         with:
-          name: warranty-wallet-apk
-          path: android/app/build/outputs/apk/release/*.apk
-          if-no-files-found: error
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+
+      - name: Build APK with EAS
+        run: eas build --platform android --profile apk --non-interactive --no-wait
+
+      - name: Wait for build completion and download
+        run: |
+          echo "Build started successfully!"
+          echo "You can monitor the build at: https://expo.dev"
+          echo "The APK will be available in your Expo dashboard when ready."
+          echo ""
+          echo "To download the APK:"
+          echo "1. Go to https://expo.dev"
+          echo "2. Navigate to your project builds"
+          echo "3. Download the APK when the build completes (~10-15 minutes)"
