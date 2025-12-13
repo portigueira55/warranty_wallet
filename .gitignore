@@ -35,8 +35,8 @@ npm-debug.*
 # TypeScript
 *.tsbuildinfo
 
-# Android (keep generated native code for CI)
-# android/
+# Android
+android/
 *.apk
 *.aab
 
