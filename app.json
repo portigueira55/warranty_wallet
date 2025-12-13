@@ -2,7 +2,7 @@
   "expo": {
     "name": "Warranty Wallet",
     "slug": "warranty-wallet",
-    "version": "1.0.0",
+    "version": "1.0.2",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "automatic",
@@ -46,11 +46,12 @@
         {
           "photosPermission": "Permitir acceso a fotos para seleccionar tickets de compra."
         }
-      ]
+      ],
+      "expo-font"
     ],
     "extra": {
       "eas": {
-        "projectId": "warranty-wallet"
+        "projectId": "2d22482c-ffcd-4458-9729-cf77cf1a5c19"
       }
     }
   }

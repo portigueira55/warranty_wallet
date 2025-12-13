@@ -59,9 +59,28 @@ cd android
 
 El APK se generará en `android/app/build/outputs/apk/release/`
 
-## GitHub Actions
+## GitHub Actions con EAS Build
 
-El proyecto incluye un workflow de GitHub Actions que compila automáticamente la APK en cada push. La APK compilada estará disponible como artifact en la pestaña Actions.
+El proyecto incluye un workflow de GitHub Actions que inicia automáticamente una compilación con EAS Build en cada push a las ramas `main`, `master` o `claude/**`.
+
+**Características del workflow:**
+- ✅ Usa EAS Build (infraestructura en la nube de Expo)
+- ✅ Se ejecuta automáticamente en cada push
+- ✅ Compilación confiable y optimizada
+- ✅ Tiempo estimado: 10-15 minutos
+
+**Cómo descargar la APK:**
+1. Ve a **https://expo.dev** e inicia sesión
+2. Selecciona tu proyecto "warranty-wallet"
+3. Ve a la sección "Builds"
+4. Descarga el APK cuando el build esté completo (verás status verde ✅)
+
+**Alternativa - Build manual con EAS CLI:**
+```bash
+npm install -g eas-cli
+eas login
+eas build --platform android --profile apk
+```
 
 ## Estructura del Proyecto
 

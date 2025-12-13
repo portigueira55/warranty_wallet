@@ -1,4 +1,4 @@
-name: Build Android APK
+name: Build Android APK with EAS
 
 on:
   push:
@@ -14,7 +14,7 @@ on:
 
 jobs:
   build:
-    name: Build Android APK
+    name: Build Android APK with EAS
     runs-on: ubuntu-latest
 
     steps:
@@ -27,20 +27,8 @@ jobs:
           node-version: '20'
           cache: 'npm'
 
-      - name: Setup Java JDK
-        uses: actions/setup-java@v4
-        with:
-          distribution: 'temurin'
-          java-version: '17'
-
-      - name: Setup Android SDK
-        uses: android-actions/setup-android@v3
-
       - name: Install dependencies
         run: npm ci
-
-      - name: Setup Expo CLI
-        run: npm install -g expo-cli eas-cli
 
       - name: Setup EAS
         uses: expo/expo-github-action@v8
@@ -48,131 +36,16 @@ jobs:
           eas-version: latest
           token: ${{ secrets.EXPO_TOKEN }}
 
-      - name: Create assets directory
-        run: mkdir -p assets
-
-      - name: Generate placeholder icons
-        run: |
-          # Crear icono simple usando ImageMagick
-          if command -v convert &> /dev/null; then
-            convert -size 1024x1024 xc:'#1a73e8' \
-              -fill white -gravity center -pointsize 400 \
-              -annotate 0 'W' assets/icon.png
-            convert -size 1024x1024 xc:'#1a73e8' \
-              -fill white -gravity center -pointsize 400 \
-              -annotate 0 'W' assets/adaptive-icon.png
-            convert -size 1284x2778 xc:'#1a73e8' \
-              -fill white -gravity center -pointsize 200 \
-              -annotate 0 'Warranty\nWallet' assets/splash.png
-            convert -size 48x48 xc:'#1a73e8' \
-              -fill white -gravity center -pointsize 20 \
-              -annotate 0 'W' assets/favicon.png
-          else
-            # Fallback: crear imágenes PNG mínimas
-            echo "Creating minimal placeholder images..."
-            # PNG mínimo azul 1x1
-            printf '\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR\x00\x00\x00\x01\x00\x00\x00\x01\x08\x02\x00\x00\x00\x90wS\xde\x00\x00\x00\x0cIDATx\x9cc\xf8\xcf\xc0\x00\x00\x00\x03\x00\x01\x00\x05\xfe\xd4\x00\x00\x00\x00IEND\xaeB`\x82' > assets/icon.png
-            cp assets/icon.png assets/adaptive-icon.png
-            cp assets/icon.png assets/splash.png
-            cp assets/icon.png assets/favicon.png
-          fi
-
       - name: Build APK with EAS
         run: eas build --platform android --profile apk --non-interactive --no-wait
-        continue-on-error: true
 
-      - name: Alternative - Build with Expo
-        if: failure()
+      - name: Wait for build completion and download
         run: |
-          npx expo prebuild --platform android
-          cd android
-          ./gradlew assembleRelease
-
-      - name: Upload APK artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: warranty-wallet-apk
-          path: |
-            android/app/build/outputs/apk/release/*.apk
-            *.apk
-          if-no-files-found: warn
-
-  build-local:
-    name: Build Android APK (Local)
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-          cache: 'npm'
-
-      - name: Setup Java JDK
-        uses: actions/setup-java@v4
-        with:
-          distribution: 'temurin'
-          java-version: '17'
-
-      - name: Setup Android SDK
-        uses: android-actions/setup-android@v3
-
-      - name: Accept Android licenses
-        run: yes | sdkmanager --licenses || true
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Install Expo CLI
-        run: npm install -g expo-cli @expo/ngrok
-
-      - name: Create assets directory
-        run: mkdir -p assets
-
-      - name: Generate placeholder assets
-        run: |
-          # Crear archivos PNG válidos mínimos
-          node -e "
-          const fs = require('fs');
-
-          // PNG mínimo 1x1 pixel azul (#1a73e8)
-          const pngHeader = Buffer.from([
-            0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A,
-            0x00, 0x00, 0x00, 0x0D, 0x49, 0x48, 0x44, 0x52,
-            0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x01,
-            0x08, 0x02, 0x00, 0x00, 0x00, 0x90, 0x77, 0x53,
-            0xDE, 0x00, 0x00, 0x00, 0x0C, 0x49, 0x44, 0x41,
-            0x54, 0x78, 0x9C, 0x63, 0x18, 0x73, 0xE8, 0x00,
-            0x00, 0x00, 0x05, 0x00, 0x01, 0x00, 0x0D, 0x0A,
-            0x2D, 0xB4, 0x00, 0x00, 0x00, 0x00, 0x49, 0x45,
-            0x4E, 0x44, 0xAE, 0x42, 0x60, 0x82
-          ]);
-
-          fs.writeFileSync('assets/icon.png', pngHeader);
-          fs.writeFileSync('assets/adaptive-icon.png', pngHeader);
-          fs.writeFileSync('assets/splash.png', pngHeader);
-          fs.writeFileSync('assets/favicon.png', pngHeader);
-          console.log('Assets created successfully');
-          "
-
-      - name: Prebuild Android
-        run: npx expo prebuild --platform android --clean
-
-      - name: Build Android APK
-        run: |
-          cd android
-          chmod +x ./gradlew
-          ./gradlew assembleRelease
-
-      - name: List build outputs
-        run: find android -name "*.apk" -type f
-
-      - name: Upload APK artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: warranty-wallet-apk-local
-          path: android/app/build/outputs/apk/release/*.apk
-          if-no-files-found: error
+          echo "Build started successfully!"
+          echo "You can monitor the build at: https://expo.dev"
+          echo "The APK will be available in your Expo dashboard when ready."
+          echo ""
+          echo "To download the APK:"
+          echo "1. Go to https://expo.dev"
+          echo "2. Navigate to your project builds"
+          echo "3. Download the APK when the build completes (~10-15 minutes)"
