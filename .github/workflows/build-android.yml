@@ -51,11 +51,13 @@ jobs:
       - name: Prebuild Android
         run: npx expo prebuild --platform android --clean
 
+      - name: Make gradlew executable
+        run: chmod +x android/gradlew
+
       - name: Build Android APK
         run: |
           cd android
-          chmod +x ./gradlew
-          ./gradlew assembleRelease
+          ./gradlew assembleRelease --no-daemon --warning-mode all
 
       - name: List build outputs
         run: find android -name "*.apk" -type f
