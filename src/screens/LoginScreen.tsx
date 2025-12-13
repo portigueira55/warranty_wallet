@@ -156,8 +156,8 @@ export const LoginScreen: React.FC = () => {
 
         {/* Info Demo */}
         <View style={styles.demoInfo}>
-          <Text style={styles.demoTitle}>Credenciales Demo:</Text>
-          <Text style={styles.demoText}>Usuario: admin | Contraseña: 1234</Text>
+          <Text style={styles.demoTitle}>Modo Demo Activo</Text>
+          <Text style={styles.demoText}>Acceso automático - Login desactivado</Text>
         </View>
 
         {/* Footer seguridad */}
