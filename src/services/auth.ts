@@ -80,6 +80,20 @@ export class AuthService {
    */
   static async login(username: string, password: string): Promise<User | null> {
     try {
+      // CREDENCIALES HARDCODEADAS PARA ADMIN (siempre disponibles, no requieren AsyncStorage)
+      if (username === 'admin' && password === '1234') {
+        const adminUser: User = {
+          id: 'admin-default-id',
+          username: 'admin',
+          email: 'admin@warrantywallet.com',
+          role: 'admin',
+          tenantId: 'admin-tenant',
+          createdAt: new Date().toISOString()
+        };
+        await UserStorage.setCurrentUser(adminUser);
+        return adminUser;
+      }
+
       const credentials = await this.getCredentials();
       const userCreds = credentials.find(c => c.username === username);
 
