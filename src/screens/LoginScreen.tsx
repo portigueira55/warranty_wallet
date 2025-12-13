@@ -13,6 +13,7 @@ import {
 } from 'react-native';
 import { useAuth } from '../context/AuthContext';
 import { Ionicons } from '@expo/vector-icons';
+import Constants from 'expo-constants';
 
 const { width } = Dimensions.get('window');
 
@@ -164,6 +165,13 @@ export const LoginScreen: React.FC = () => {
           <Ionicons name="shield-checkmark" size={16} color="#28a745" />
           <Text style={styles.securityText}>Datos cifrados con AES-256</Text>
         </View>
+
+        {/* Versión */}
+        <View style={styles.versionBadge}>
+          <Text style={styles.versionText}>
+            v{Constants.expoConfig?.version || '1.0.1'}
+          </Text>
+        </View>
       </View>
     </KeyboardAvoidingView>
   );
@@ -285,5 +293,14 @@ const styles = StyleSheet.create({
     marginLeft: 6,
     fontSize: 12,
     color: '#28a745'
+  },
+  versionBadge: {
+    alignItems: 'center',
+    marginTop: 12
+  },
+  versionText: {
+    fontSize: 11,
+    color: '#999',
+    fontWeight: '500'
   }
 });
