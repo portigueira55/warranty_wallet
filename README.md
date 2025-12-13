@@ -61,7 +61,19 @@ El APK se generará en `android/app/build/outputs/apk/release/`
 
 ## GitHub Actions
 
-El proyecto incluye un workflow de GitHub Actions que compila automáticamente la APK en cada push. La APK compilada estará disponible como artifact en la pestaña Actions.
+El proyecto incluye un workflow de GitHub Actions que compila automáticamente la APK en cada push a las ramas `main`, `master` o `claude/**`.
+
+**Características del workflow:**
+- ✅ Compilación local con Gradle (no requiere cuenta Expo)
+- ✅ Se ejecuta automáticamente en cada push
+- ✅ La APK estará disponible como artifact descargable
+- ✅ Tiempo estimado: 10-15 minutos
+
+**Cómo descargar la APK:**
+1. Ve a la pestaña "Actions" en GitHub
+2. Selecciona el workflow más reciente
+3. Descarga el artifact "warranty-wallet-apk"
+4. Descomprime el ZIP y encontrarás el archivo APK
 
 ## Estructura del Proyecto
 
