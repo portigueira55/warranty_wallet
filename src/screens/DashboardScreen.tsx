@@ -40,9 +40,31 @@ export const DashboardScreen: React.FC = () => {
 
     try {
       const userTickets = await TicketStorage.getTicketsByUser(user.id, user.tenantId);
-      setTickets(userTickets.sort((a, b) =>
-        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-      ));
+
+      // Si no hay tickets, cargar datos de ejemplo automáticamente
+      if (userTickets.length === 0) {
+        console.log('📦 No hay tickets, cargando datos de ejemplo automáticamente...');
+        try {
+          await loadSampleData(user.id, user.tenantId);
+          const sampleTickets = await TicketStorage.getTicketsByUser(user.id, user.tenantId);
+          setTickets(sampleTickets.sort((a, b) =>
+            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+          ));
+          console.log('✅ Datos de ejemplo cargados automáticamente');
+        } catch (error) {
+          console.error('❌ Error cargando datos de ejemplo:', error);
+          setTickets([]);
+        }
+      } else {
+        setTickets(userTickets.sort((a, b) =>
+          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+        ));
+      }
+
+      // Calcular estadísticas con los tickets actuales
+      const currentTickets = userTickets.length === 0
+        ? await TicketStorage.getTicketsByUser(user.id, user.tenantId)
+        : userTickets;
 
       // Calcular estadísticas
       const now = new Date();
@@ -56,7 +78,7 @@ export const DashboardScreen: React.FC = () => {
       let totalProducts = 0;
       const uniqueStores = new Set<string>();
 
-      userTickets.forEach(ticket => {
+      currentTickets.forEach(ticket => {
         // Garantías
         const warrantyEnd = new Date(ticket.warrantyEndDate);
         if (warrantyEnd < now) {
@@ -81,7 +103,7 @@ export const DashboardScreen: React.FC = () => {
       });
 
       setStats({
-        total: userTickets.length,
+        total: currentTickets.length,
         active,
         expiringSoon,
         expired,
