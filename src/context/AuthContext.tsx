@@ -27,22 +27,39 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const initializeAuth = async () => {
     try {
-      // Inicializar usuario demo
+      // MODO DESARROLLO: Login automático con usuario demo
       await AuthService.initializeDemoUser();
-
-      // Verificar sesión existente
       const user = await AuthService.checkSession();
 
-      setState({
-        isAuthenticated: !!user,
-        user,
-        isLoading: false
-      });
+      // Si no hay sesión, crear usuario demo automáticamente
+      if (!user) {
+        const demoUser = await AuthService.login('demo', 'demo123');
+        setState({
+          isAuthenticated: true,
+          user: demoUser,
+          isLoading: false
+        });
+      } else {
+        setState({
+          isAuthenticated: true,
+          user,
+          isLoading: false
+        });
+      }
     } catch (error) {
       console.error('Error inicializando auth:', error);
+      // FALLBACK: Crear usuario demo directo
+      const demoUser: User = {
+        id: 'demo-user-id',
+        username: 'demo',
+        email: 'demo@warrantywallet.com',
+        role: 'user',
+        tenantId: 'demo-tenant',
+        createdAt: new Date().toISOString()
+      };
       setState({
-        isAuthenticated: false,
-        user: null,
+        isAuthenticated: true,
+        user: demoUser,
         isLoading: false
       });
     }

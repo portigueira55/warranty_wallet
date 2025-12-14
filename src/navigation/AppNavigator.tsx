@@ -38,19 +38,20 @@ const MainStack = () => (
 );
 
 export const AppNavigator: React.FC = () => {
-  const { isAuthenticated, isLoading } = useAuth();
+  // DESACTIVADO LOGIN PARA DESARROLLO
+  // const { isAuthenticated, isLoading } = useAuth();
 
-  if (isLoading) {
-    return (
-      <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#1a73e8" />
-      </View>
-    );
-  }
+  // if (isLoading) {
+  //   return (
+  //     <View style={styles.loadingContainer}>
+  //       <ActivityIndicator size="large" color="#1a73e8" />
+  //     </View>
+  //   );
+  // }
 
   return (
     <NavigationContainer>
-      {isAuthenticated ? <MainStack /> : <AuthStack />}
+      <MainStack />
     </NavigationContainer>
   );
 };
