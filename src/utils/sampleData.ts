@@ -293,13 +293,29 @@ export const generateSampleTickets = (userId: string, tenantId: string): Ticket[
  * Carga los datos de ejemplo en el storage
  */
 export const loadSampleData = async (userId: string, tenantId: string): Promise<void> => {
-  const { TicketStorage } = await import('../services/storage');
+  try {
+    console.log('📦 Iniciando carga de datos de ejemplo...');
+    console.log('👤 Usuario:', userId);
+    console.log('🏢 Tenant:', tenantId);
 
-  const sampleTickets = generateSampleTickets(userId, tenantId);
+    if (!userId || !tenantId) {
+      throw new Error('Se requieren userId y tenantId para cargar datos de ejemplo');
+    }
 
-  for (const ticket of sampleTickets) {
-    await TicketStorage.saveTicket(ticket);
+    const { TicketStorage } = await import('../services/storage');
+
+    const sampleTickets = generateSampleTickets(userId, tenantId);
+    console.log(`📝 Generados ${sampleTickets.length} tickets de ejemplo`);
+
+    for (let i = 0; i < sampleTickets.length; i++) {
+      const ticket = sampleTickets[i];
+      console.log(`💾 Guardando ticket ${i + 1}/${sampleTickets.length}: ${ticket.storeName}`);
+      await TicketStorage.saveTicket(ticket);
+    }
+
+    console.log(`✅ ${sampleTickets.length} tickets de ejemplo cargados correctamente`);
+  } catch (error) {
+    console.error('❌ Error cargando datos de ejemplo:', error);
+    throw error;
   }
-
-  console.log(`✅ ${sampleTickets.length} tickets de ejemplo cargados correctamente`);
 };

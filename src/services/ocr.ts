@@ -184,7 +184,29 @@ export class OCRService {
   static extractStoreName(text: string): string | undefined {
     const lines = text.split('\n').map(l => l.trim()).filter(l => l.length > 0);
 
-    // Buscar marcadores comunes de nombre de tienda
+    // Tiendas conocidas en España (cadenas electrónica/telefonía)
+    const knownStores = [
+      { pattern: /media\s*markt/i, name: 'MediaMarkt' },
+      { pattern: /worten/i, name: 'Worten' },
+      { pattern: /el\s*corte\s*ingl[eé]s/i, name: 'El Corte Inglés' },
+      { pattern: /fnac/i, name: 'Fnac' },
+      { pattern: /pc\s*componentes/i, name: 'PcComponentes' },
+      { pattern: /carrefour/i, name: 'Carrefour' },
+      { pattern: /alcampo/i, name: 'Alcampo' },
+      { pattern: /leroy\s*merlin/i, name: 'Leroy Merlin' },
+      { pattern: /decathlon/i, name: 'Decathlon' },
+      { pattern: /amazon/i, name: 'Amazon' }
+    ];
+
+    // Primero buscar tiendas conocidas en todo el texto
+    const fullText = text.toLowerCase();
+    for (const store of knownStores) {
+      if (store.pattern.test(fullText)) {
+        return store.name;
+      }
+    }
+
+    // Si no encuentra tienda conocida, buscar en las primeras líneas
     for (const line of lines.slice(0, 5)) {
       // Saltar líneas que son claramente datos fiscales o administrativos
       if (line.match(/(?:cif|nif|iva|tel[eé]fono|tel|fax|web|www|email|@)/i)) {
@@ -235,12 +257,69 @@ export class OCRService {
    */
   static extractTotal(text: string): number | undefined {
     const totalPatterns = [
-      /(?:total|importe\s*total|a\s*pagar)[:\s]*(\d+[,\.]\d{2})\s*€?/i,
-      /€\s*(\d+[,\.]\d{2})\s*(?:total|$)/i,
-      /(\d+[,\.]\d{2})\s*€?\s*(?:total|$)/i,
+      // "TOTAL: XX,XX €" o "TOTAL: XX.XX €"
+      /(?:total|importe\s*total|a\s*pagar)[:\s]*(\d{1,}[,\.]\d{2})\s*€?/i,
+      // "TOTAL EUR XX,XX"
+      /total\s*(?:eur|€)?\s*[:\s]*(\d{1,}[,\.]\d{2})/i,
+      // Con separador de miles: "1.234,56 €"
+      /(?:total|importe)[:\s]*(\d{1,3}(?:\.\d{3})*[,]\d{2})\s*€?/i,
+      // "XX,XX € TOTAL"
+      /(\d{1,}[,\.]\d{2})\s*€?\s*(?:total|a\s*pagar)/i,
     ];
 
     for (const pattern of totalPatterns) {
+      const match = text.match(pattern);
+      if (match && match[1]) {
+        // Manejar formato español: 1.234,56 -> 1234.56
+        let numStr = match[1];
+        if (numStr.includes('.') && numStr.includes(',')) {
+          // Formato: 1.234,56 (separador miles = punto, decimal = coma)
+          numStr = numStr.replace(/\./g, '').replace(',', '.');
+        } else if (numStr.includes(',')) {
+          // Formato: 234,56 (solo coma decimal)
+          numStr = numStr.replace(',', '.');
+        }
+
+        const amount = parseFloat(numStr);
+        if (!isNaN(amount) && amount > 0) {
+          return amount;
+        }
+      }
+    }
+
+    return undefined;
+  }
+
+  /**
+   * Extrae el NIF de la empresa del texto OCR
+   */
+  static extractNIF(text: string): string | undefined {
+    // Formato NIF español: letra + 8 dígitos o 8 dígitos + letra
+    const patterns = [
+      /(?:nif|cif)[:\s]*([a-z]\d{8}|\d{8}[a-z])/i,
+      /\b([a-z]\d{8}|\d{8}[a-z])\b/i
+    ];
+
+    for (const pattern of patterns) {
+      const match = text.match(pattern);
+      if (match && match[1]) {
+        return match[1].toUpperCase();
+      }
+    }
+
+    return undefined;
+  }
+
+  /**
+   * Extrae el IVA del texto OCR
+   */
+  static extractIVA(text: string): number | undefined {
+    const ivaPatterns = [
+      /iva\s*(?:21%?|10%?|4%?)[:\s]*(\d{1,}[,\.]\d{2})\s*€?/i,
+      /(?:base\s*imponible|base)[:\s]*(\d{1,}[,\.]\d{2})/i,
+    ];
+
+    for (const pattern of ivaPatterns) {
       const match = text.match(pattern);
       if (match && match[1]) {
         const amount = parseFloat(match[1].replace(',', '.'));
@@ -260,44 +339,37 @@ export class OCRService {
     const products: Partial<Product>[] = [];
     const lines = text.split('\n').map(l => l.trim()).filter(l => l.length > 0);
 
+    // Helper para parsear números españoles
+    const parseSpanishNumber = (str: string): number => {
+      let numStr = str;
+      // Formato español con separador de miles: 1.234,56
+      if (numStr.includes('.') && numStr.includes(',')) {
+        numStr = numStr.replace(/\./g, '').replace(',', '.');
+      } else if (numStr.includes(',')) {
+        // Solo coma decimal: 234,56
+        numStr = numStr.replace(',', '.');
+      }
+      return parseFloat(numStr);
+    };
+
     // Patrones comunes de productos en tickets españoles
     const productPatterns = [
-      // "Nombre    cantidad x precio = total"
+      // "Nombre    cantidad x precio = total" o "Nombre  cantidad x precio  total"
       {
-        pattern: /^(.+?)\s+(\d+)\s*x\s*(\d+[,\.]\d{2})\s*[=€]\s*(\d+[,\.]\d{2})/i,
+        pattern: /^(.+?)\s+(\d+)\s*[xX×]\s*(\d+[,\.]\d{2})\s*[=€]?\s*(\d+[,\.]\d{2})/,
         parse: (m: RegExpMatchArray) => ({
           name: m[1].trim(),
           quantity: parseInt(m[2]),
-          unitPrice: parseFloat(m[3].replace(',', '.')),
-          totalPrice: parseFloat(m[4].replace(',', '.'))
-        })
-      },
-      // "Nombre    cantidad    precio_unitario    total"
-      {
-        pattern: /^(.{3,40}?)\s+(\d+)\s+(\d+[,\.]\d{2})\s+(\d+[,\.]\d{2})\s*€?$/,
-        parse: (m: RegExpMatchArray) => ({
-          name: m[1].trim(),
-          quantity: parseInt(m[2]),
-          unitPrice: parseFloat(m[3].replace(',', '.')),
-          totalPrice: parseFloat(m[4].replace(',', '.'))
-        })
-      },
-      // "Nombre    total €"
-      {
-        pattern: /^(.{5,50}?)\s+(\d+[,\.]\d{2})\s*€?\s*$/,
-        parse: (m: RegExpMatchArray) => ({
-          name: m[1].trim(),
-          quantity: 1,
-          unitPrice: parseFloat(m[2].replace(',', '.')),
-          totalPrice: parseFloat(m[2].replace(',', '.'))
+          unitPrice: parseSpanishNumber(m[3]),
+          totalPrice: parseSpanishNumber(m[4])
         })
       },
       // "cantidad x Nombre = total €"
       {
-        pattern: /^(\d+)\s*x\s*(.+?)\s*[=:]\s*(\d+[,\.]\d{2})\s*€?$/i,
+        pattern: /^(\d+)\s*[xX×]\s*(.+?)\s*[=:€]\s*(\d+[,\.]\d{2})\s*€?$/,
         parse: (m: RegExpMatchArray) => {
           const quantity = parseInt(m[1]);
-          const totalPrice = parseFloat(m[3].replace(',', '.'));
+          const totalPrice = parseSpanishNumber(m[3]);
           return {
             name: m[2].trim(),
             quantity,
@@ -305,11 +377,41 @@ export class OCRService {
             totalPrice
           };
         }
+      },
+      // "Nombre    cantidad    precio_unitario    total"
+      {
+        pattern: /^(.{3,50}?)\s+(\d+)\s+(\d+[,\.]\d{2})\s+(\d+[,\.]\d{2})\s*€?$/,
+        parse: (m: RegExpMatchArray) => ({
+          name: m[1].trim(),
+          quantity: parseInt(m[2]),
+          unitPrice: parseSpanishNumber(m[3]),
+          totalPrice: parseSpanishNumber(m[4])
+        })
+      },
+      // "Nombre    total €" (formato simple, cantidad implícita = 1)
+      {
+        pattern: /^(.{5,60}?)\s+(\d+[,\.]\d{2})\s*€?\s*$/,
+        parse: (m: RegExpMatchArray) => ({
+          name: m[1].trim(),
+          quantity: 1,
+          unitPrice: parseSpanishNumber(m[2]),
+          totalPrice: parseSpanishNumber(m[2])
+        })
+      },
+      // Formato con tabs o múltiples espacios
+      {
+        pattern: /^(.+?)\s{2,}(\d+)\s{2,}(\d+[,\.]\d{2})\s{2,}(\d+[,\.]\d{2})/,
+        parse: (m: RegExpMatchArray) => ({
+          name: m[1].trim(),
+          quantity: parseInt(m[2]),
+          unitPrice: parseSpanishNumber(m[3]),
+          totalPrice: parseSpanishNumber(m[4])
+        })
       }
     ];
 
     // Palabras que indican que no es un producto
-    const excludeKeywords = /(?:total|subtotal|iva|descuento|dto|cambio|efectivo|tarjeta|gracias|thank|cif|nif|tel|fax|horario|web|email|@)/i;
+    const excludeKeywords = /(?:total|subtotal|iva|base\s*imponible|descuento|dto|ahorro|cambio|efectivo|tarjeta|visa|mastercard|gracias|thank|cif|nif|tel|fax|horario|web|email|www|@|factura|ticket|ref|fecha|hora)/i;
 
     for (const line of lines) {
       // Saltar líneas con palabras clave de no-producto

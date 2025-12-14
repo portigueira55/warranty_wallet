@@ -3,7 +3,7 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { useAuth } from '../context/AuthContext';
 import { LoginScreen } from '../screens/LoginScreen';
-import { DashboardScreen } from '../screens/DashboardScreen';
+import { MainTabs } from './MainTabs';
 import { AddTicketScreen } from '../screens/AddTicketScreen';
 import { TicketDetailScreen } from '../screens/TicketDetailScreen';
 import { View, ActivityIndicator, StyleSheet } from 'react-native';
@@ -18,7 +18,7 @@ const AuthStack = () => (
 
 const MainStack = () => (
   <Stack.Navigator screenOptions={{ headerShown: false }}>
-    <Stack.Screen name="Dashboard" component={DashboardScreen} />
+    <Stack.Screen name="MainTabs" component={MainTabs} />
     <Stack.Screen
       name="AddTicket"
       component={AddTicketScreen}
