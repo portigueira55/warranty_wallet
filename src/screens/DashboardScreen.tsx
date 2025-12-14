@@ -12,10 +12,9 @@ import {
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../context/AuthContext';
-import { TicketStorage } from '../services/storage';
 import { Ticket } from '../types';
 import { WarrantyCard } from '../components/WarrantyCard';
-import { loadSampleData } from '../utils/sampleData';
+import { getMockTickets } from '../services/mockData';
 
 const { width } = Dimensions.get('window');
 const isTablet = width >= 768;
@@ -35,93 +34,64 @@ export const DashboardScreen: React.FC = () => {
     storesCount: 0
   });
 
-  const loadTickets = useCallback(async () => {
-    if (!user) return;
+  const loadTickets = useCallback(() => {
+    // Cargar tickets de ejemplo directamente desde memoria (sin AsyncStorage)
+    console.log('📦 Cargando tickets de ejemplo...');
+    const mockTickets = getMockTickets();
+    console.log(`✅ ${mockTickets.length} tickets cargados`);
 
-    try {
-      console.log('🔍 Cargando tickets para usuario:', user.id);
-      const userTickets = await TicketStorage.getTicketsByUser(user.id, user.tenantId);
-      console.log(`📋 Encontrados ${userTickets.length} tickets`);
+    // Ordenar por fecha de creación (más recientes primero)
+    const sortedTickets = mockTickets.sort((a, b) =>
+      new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+    );
+    setTickets(sortedTickets);
 
-      // Si no hay tickets, cargar datos de ejemplo automáticamente
-      if (userTickets.length === 0) {
-        console.log('📦 No hay tickets, cargando datos de ejemplo automáticamente...');
-        try {
-          await loadSampleData(user.id, user.tenantId);
-          const sampleTickets = await TicketStorage.getTicketsByUser(user.id, user.tenantId);
-          console.log(`✅ ${sampleTickets.length} datos de ejemplo cargados`);
-          setTickets(sampleTickets.sort((a, b) =>
-            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-          ));
-        } catch (error) {
-          console.error('❌ Error cargando datos de ejemplo:', error);
-          Alert.alert(
-            'Error al cargar datos',
-            `No se pudieron cargar los datos de ejemplo:\n\n${error instanceof Error ? error.message : String(error)}\n\nPrueba a limpiar el almacenamiento desde Perfil.`,
-            [{ text: 'OK' }]
-          );
-          setTickets([]);
-        }
+    // Calcular estadísticas
+    const now = new Date();
+    const threeMonthsFromNow = new Date();
+    threeMonthsFromNow.setMonth(threeMonthsFromNow.getMonth() + 3);
+
+    let active = 0;
+    let expiringSoon = 0;
+    let expired = 0;
+    let totalSpent = 0;
+    let totalProducts = 0;
+    const uniqueStores = new Set<string>();
+
+    mockTickets.forEach(ticket => {
+      // Garantías
+      const warrantyEnd = new Date(ticket.warrantyEndDate);
+      if (warrantyEnd < now) {
+        expired++;
+      } else if (warrantyEnd < threeMonthsFromNow) {
+        expiringSoon++;
+        active++;
       } else {
-        setTickets(userTickets.sort((a, b) =>
-          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-        ));
+        active++;
       }
 
-      // Calcular estadísticas con los tickets actuales
-      const currentTickets = userTickets.length === 0
-        ? await TicketStorage.getTicketsByUser(user.id, user.tenantId)
-        : userTickets;
-
-      // Calcular estadísticas
-      const now = new Date();
-      const threeMonthsFromNow = new Date();
-      threeMonthsFromNow.setMonth(threeMonthsFromNow.getMonth() + 3);
-
-      let active = 0;
-      let expiringSoon = 0;
-      let expired = 0;
-      let totalSpent = 0;
-      let totalProducts = 0;
-      const uniqueStores = new Set<string>();
-
-      currentTickets.forEach(ticket => {
-        // Garantías
-        const warrantyEnd = new Date(ticket.warrantyEndDate);
-        if (warrantyEnd < now) {
-          expired++;
-        } else if (warrantyEnd < threeMonthsFromNow) {
-          expiringSoon++;
-          active++;
-        } else {
-          active++;
-        }
-
-        // Gastos y productos
-        ticket.products.forEach(product => {
-          totalSpent += product.unitPrice * product.quantity;
-          totalProducts += product.quantity;
-        });
-
-        // Tiendas únicas
-        if (ticket.storeName) {
-          uniqueStores.add(ticket.storeName);
-        }
+      // Gastos y productos
+      ticket.products.forEach(product => {
+        totalSpent += product.unitPrice * product.quantity;
+        totalProducts += product.quantity;
       });
 
-      setStats({
-        total: currentTickets.length,
-        active,
-        expiringSoon,
-        expired,
-        totalSpent,
-        totalProducts,
-        storesCount: uniqueStores.size
-      });
-    } catch (error) {
-      console.error('Error cargando tickets:', error);
-    }
-  }, [user]);
+      // Tiendas únicas
+      if (ticket.storeName) {
+        uniqueStores.add(ticket.storeName);
+      }
+    });
+
+    setStats({
+      total: mockTickets.length,
+      active,
+      expiringSoon,
+      expired,
+      totalSpent,
+      totalProducts,
+      storesCount: uniqueStores.size
+    });
+  }, []);
 
   useFocusEffect(
     useCallback(() => {
@@ -129,60 +99,10 @@ export const DashboardScreen: React.FC = () => {
     }, [loadTickets])
   );
 
-  const onRefresh = async () => {
+  const onRefresh = () => {
     setRefreshing(true);
-    await loadTickets();
+    loadTickets();
     setRefreshing(false);
-  };
-
-  const handleLoadSampleData = async () => {
-    if (!user) {
-      Alert.alert('Error', 'No hay usuario autenticado. Por favor, inicia sesión.');
-      return;
-    }
-
-    Alert.alert(
-      'Cargar datos de ejemplo',
-      '¿Deseas cargar 7 tickets de ejemplo con productos en diferentes estados de garantía (vigente, próxima a vencer y vencida)?',
-      [
-        {
-          text: 'Cancelar',
-          style: 'cancel'
-        },
-        {
-          text: 'Cargar',
-          onPress: async () => {
-            try {
-              console.log('🔄 Iniciando carga de datos de ejemplo desde Dashboard...');
-              console.log('User ID:', user.id);
-              console.log('Tenant ID:', user.tenantId);
-
-              setRefreshing(true);
-              await loadSampleData(user.id, user.tenantId);
-
-              console.log('🔄 Recargando tickets...');
-              await loadTickets();
-
-              setRefreshing(false);
-
-              Alert.alert(
-                'Éxito',
-                'Se han cargado 7 tickets de ejemplo con productos en diferentes estados de garantía'
-              );
-            } catch (error) {
-              console.error('❌ Error cargando datos de ejemplo:', error);
-              setRefreshing(false);
-
-              const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
-              Alert.alert(
-                'Error',
-                `No se pudieron cargar los datos de ejemplo:\n\n${errorMessage}`
-              );
-            }
-          }
-        }
-      ]
-    );
   };
 
   const renderHeader = () => (
@@ -306,15 +226,6 @@ export const DashboardScreen: React.FC = () => {
       >
         <Ionicons name="add" size={20} color="#fff" />
         <Text style={styles.addFirstButtonText}>Añadir Ticket</Text>
-      </TouchableOpacity>
-
-      {/* Botón para cargar datos de ejemplo */}
-      <TouchableOpacity
-        style={styles.sampleDataButton}
-        onPress={handleLoadSampleData}
-      >
-        <Ionicons name="albums-outline" size={18} color="#1a73e8" />
-        <Text style={styles.sampleDataButtonText}>Cargar datos de ejemplo</Text>
       </TouchableOpacity>
     </View>
   );
@@ -540,22 +451,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
     marginLeft: 8
-  },
-  sampleDataButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 20,
-    paddingVertical: 10,
-    borderRadius: 20,
-    marginTop: 12,
-    borderWidth: 1,
-    borderColor: '#1a73e8'
-  },
-  sampleDataButtonText: {
-    color: '#1a73e8',
-    fontSize: 14,
-    fontWeight: '500',
-    marginLeft: 6
   },
   fab: {
     position: 'absolute',

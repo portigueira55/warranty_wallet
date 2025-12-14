@@ -10,7 +10,7 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../context/AuthContext';
-import { TicketStorage, SecureStorage } from '../services/storage';
+import { getMockTickets } from '../services/mockData';
 import { Ticket } from '../types';
 import QRCode from 'react-native-qrcode-svg';
 
@@ -40,12 +40,11 @@ export const ProfileScreen: React.FC = () => {
     loadUserStats();
   }, []);
 
-  const loadUserStats = async () => {
-    if (!user) return;
-
+  const loadUserStats = () => {
     try {
       setIsLoading(true);
-      const tickets = await TicketStorage.getTicketsByUser(user.id, user.tenantId);
+      // Cargar tickets de ejemplo directamente desde memoria
+      const tickets = getMockTickets();
 
       // Calcular estadísticas
       const now = new Date();
@@ -117,39 +116,6 @@ export const ProfileScreen: React.FC = () => {
     );
   };
 
-  const handleClearStorage = () => {
-    Alert.alert(
-      'Limpiar almacenamiento',
-      '¿Estás seguro? Esto eliminará TODOS los datos de la aplicación incluyendo tickets guardados. Esta acción no se puede deshacer.',
-      [
-        { text: 'Cancelar', style: 'cancel' },
-        {
-          text: 'Eliminar todo',
-          style: 'destructive',
-          onPress: async () => {
-            try {
-              await SecureStorage.clear();
-              Alert.alert(
-                'Almacenamiento limpiado',
-                'Se han eliminado todos los datos. La app se recargará automáticamente.',
-                [
-                  {
-                    text: 'OK',
-                    onPress: () => {
-                      // Recargar la app
-                      if (logout) logout();
-                    }
-                  }
-                ]
-              );
-            } catch (error) {
-              Alert.alert('Error', 'No se pudo limpiar el almacenamiento');
-            }
-          }
-        }
-      ]
-    );
-  };
 
   const handleLogout = () => {
     Alert.alert(
@@ -297,15 +263,6 @@ export const ProfileScreen: React.FC = () => {
         <TouchableOpacity style={styles.option}>
           <Ionicons name="notifications-outline" size={24} color="#666" />
           <Text style={styles.optionText}>Notificaciones</Text>
-          <Ionicons name="chevron-forward" size={24} color="#ccc" />
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={styles.option}
-          onPress={handleClearStorage}
-        >
-          <Ionicons name="trash-outline" size={24} color="#ea4335" />
-          <Text style={[styles.optionText, { color: '#ea4335' }]}>Limpiar almacenamiento</Text>
           <Ionicons name="chevron-forward" size={24} color="#ccc" />
         </TouchableOpacity>
 

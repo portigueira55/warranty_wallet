@@ -9,7 +9,7 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../context/AuthContext';
-import { TicketStorage } from '../services/storage';
+import { getMockTickets } from '../services/mockData';
 import { Ticket } from '../types';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -33,12 +33,11 @@ export const StoresScreen: React.FC = () => {
     loadStores();
   }, []);
 
-  const loadStores = async () => {
-    if (!user) return;
-
+  const loadStores = () => {
     try {
       setIsLoading(true);
-      const tickets = await TicketStorage.getTicketsByUser(user.id, user.tenantId);
+      // Cargar tickets de ejemplo directamente desde memoria
+      const tickets = getMockTickets();
 
       // Agrupar tickets por tienda
       const groupedMap = new Map<string, Ticket[]>();
