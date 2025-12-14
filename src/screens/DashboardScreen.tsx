@@ -39,7 +39,9 @@ export const DashboardScreen: React.FC = () => {
     if (!user) return;
 
     try {
+      console.log('🔍 Cargando tickets para usuario:', user.id);
       const userTickets = await TicketStorage.getTicketsByUser(user.id, user.tenantId);
+      console.log(`📋 Encontrados ${userTickets.length} tickets`);
 
       // Si no hay tickets, cargar datos de ejemplo automáticamente
       if (userTickets.length === 0) {
@@ -47,12 +49,17 @@ export const DashboardScreen: React.FC = () => {
         try {
           await loadSampleData(user.id, user.tenantId);
           const sampleTickets = await TicketStorage.getTicketsByUser(user.id, user.tenantId);
+          console.log(`✅ ${sampleTickets.length} datos de ejemplo cargados`);
           setTickets(sampleTickets.sort((a, b) =>
             new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
           ));
-          console.log('✅ Datos de ejemplo cargados automáticamente');
         } catch (error) {
           console.error('❌ Error cargando datos de ejemplo:', error);
+          Alert.alert(
+            'Error al cargar datos',
+            `No se pudieron cargar los datos de ejemplo:\n\n${error instanceof Error ? error.message : String(error)}\n\nPrueba a limpiar el almacenamiento desde Perfil.`,
+            [{ text: 'OK' }]
+          );
           setTickets([]);
         }
       } else {
