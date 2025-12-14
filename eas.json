@@ -8,13 +8,13 @@
       "developmentClient": true,
       "distribution": "internal",
       "android": {
-        "prebuildCommand": "echo 'Skipping prebuild - using committed android code'"
+        "withoutCredentials": true
       }
     },
     "preview": {
       "android": {
         "buildType": "apk",
-        "prebuildCommand": "echo 'Skipping prebuild - using committed android code'"
+        "withoutCredentials": true
       },
       "distribution": "internal"
     },
@@ -22,13 +22,12 @@
       "android": {
         "buildType": "apk",
         "gradleCommand": ":app:assembleRelease",
-        "prebuildCommand": "echo 'Skipping prebuild - using committed android code'"
+        "withoutCredentials": true
       }
     },
     "production": {
       "android": {
-        "buildType": "app-bundle",
-        "prebuildCommand": "echo 'Skipping prebuild - using committed android code'"
+        "buildType": "app-bundle"
       }
     }
   },
