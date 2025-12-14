@@ -10,7 +10,7 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../context/AuthContext';
-import { TicketService } from '../services/tickets';
+import { TicketStorage } from '../services/storage';
 import { Ticket } from '../types';
 import QRCode from 'react-native-qrcode-svg';
 
@@ -45,7 +45,7 @@ export const ProfileScreen: React.FC = () => {
 
     try {
       setIsLoading(true);
-      const tickets = await TicketService.getTickets(user.id, user.tenantId);
+      const tickets = await TicketStorage.getTicketsByUser(user.id, user.tenantId);
 
       // Calcular estadísticas
       const now = new Date();
