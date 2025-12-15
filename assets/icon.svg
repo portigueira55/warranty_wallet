@@ -1,0 +1,45 @@
+<svg width="1024" height="1024" viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg">
+  <!-- Fondo con gradiente -->
+  <defs>
+    <linearGradient id="walletGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#1a73e8;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#0d47a1;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="thumbGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#ffd54f;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#ffb300;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+
+  <!-- Fondo del icono -->
+  <rect width="1024" height="1024" rx="180" fill="url(#walletGradient)"/>
+
+  <!-- Cartera (cuerpo principal) -->
+  <rect x="200" y="400" width="624" height="424" rx="40" fill="#0d47a1" stroke="#0a3d91" stroke-width="8"/>
+
+  <!-- Solapa de la cartera -->
+  <path d="M 200 450 L 200 400 Q 200 380 220 380 L 804 380 Q 824 380 824 400 L 824 450 Z" fill="#1565c0" stroke="#0d47a1" stroke-width="6"/>
+
+  <!-- Cierre/botón de la cartera -->
+  <circle cx="512" cy="500" r="30" fill="#ffb300" stroke="#ff8f00" stroke-width="4"/>
+
+  <!-- Líneas de detalle en la cartera -->
+  <line x1="220" y1="600" x2="804" y2="600" stroke="#0a3d91" stroke-width="3" opacity="0.3"/>
+  <line x1="220" y1="700" x2="804" y2="700" stroke="#0a3d91" stroke-width="3" opacity="0.3"/>
+
+  <!-- Pulgar saliendo de la cartera (mano) -->
+  <!-- Base del pulgar -->
+  <ellipse cx="512" cy="350" rx="60" ry="80" fill="url(#thumbGradient)" stroke="#ff8f00" stroke-width="6"/>
+
+  <!-- Parte superior del pulgar -->
+  <ellipse cx="512" cy="270" rx="55" ry="70" fill="url(#thumbGradient)" stroke="#ff8f00" stroke-width="6"/>
+
+  <!-- Uña del pulgar -->
+  <ellipse cx="512" cy="240" rx="30" ry="25" fill="#fff9e1" stroke="#ffb300" stroke-width="3"/>
+
+  <!-- Brillo en el pulgar -->
+  <ellipse cx="495" cy="260" rx="15" ry="20" fill="#ffffff" opacity="0.4"/>
+
+  <!-- Sombra interior de la cartera donde sale el pulgar -->
+  <ellipse cx="512" cy="380" rx="70" ry="30" fill="#000000" opacity="0.2"/>
+</svg>

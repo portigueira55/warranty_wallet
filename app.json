@@ -4,7 +4,13 @@
     "slug": "warranty-wallet",
     "version": "1.0.0",
     "orientation": "portrait",
+    "icon": "./assets/icon.png",
     "userInterfaceStyle": "automatic",
+    "splash": {
+      "image": "./assets/icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#1a73e8"
+    },
     "assetBundlePatterns": [
       "**/*"
     ],
@@ -14,6 +20,10 @@
     },
     "android": {
       "package": "com.warrantywallet.app",
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#1a73e8"
+      },
       "permissions": [
         "android.permission.CAMERA",
         "android.permission.READ_EXTERNAL_STORAGE",
