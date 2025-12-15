@@ -101,7 +101,13 @@ export const WarrantyCard: React.FC<WarrantyCardProps> = ({ ticket, onPress }) =
     >
       {/* Imagen thumbnail */}
       <View style={styles.imageContainer}>
-        <Image source={{ uri: ticket.imageUri }} style={styles.thumbnail} />
+        {ticket.imageUri ? (
+          <Image source={{ uri: ticket.imageUri }} style={styles.thumbnail} />
+        ) : (
+          <View style={[styles.thumbnail, styles.placeholderContainer]}>
+            <Ionicons name="receipt-outline" size={40} color="#ccc" />
+          </View>
+        )}
         <View style={[styles.statusBadge, { backgroundColor: getStatusBgColor() }]}>
           <Ionicons
             name={timeRemaining.isExpired ? 'close-circle' : 'shield-checkmark'}
@@ -195,6 +201,11 @@ const styles = StyleSheet.create({
     width: '100%',
     height: '100%',
     minHeight: 140
+  },
+  placeholderContainer: {
+    backgroundColor: '#f5f7fa',
+    justifyContent: 'center',
+    alignItems: 'center'
   },
   statusBadge: {
     position: 'absolute',

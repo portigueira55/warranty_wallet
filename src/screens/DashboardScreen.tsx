@@ -105,6 +105,15 @@ export const DashboardScreen: React.FC = () => {
     setRefreshing(false);
   };
 
+  const handleNotifications = () => {
+    // Mostrar notificaciones de garantías por vencer
+    Alert.alert(
+      'Notificaciones',
+      `Tienes ${stats.expiringSoon} garantía${stats.expiringSoon !== 1 ? 's' : ''} que vence${stats.expiringSoon !== 1 ? 'n' : ''} en los próximos 3 meses`,
+      [{ text: 'OK' }]
+    );
+  };
+
   const renderHeader = () => (
     <View style={styles.header}>
       {/* Saludo */}
@@ -113,12 +122,31 @@ export const DashboardScreen: React.FC = () => {
         <Text style={styles.userName}>{user?.username || 'Usuario'}</Text>
       </View>
 
-      {/* Botón Logout */}
-      <TouchableOpacity style={styles.logoutButton} onPress={logout}>
-        <Ionicons name="log-out-outline" size={24} color="#666" />
-      </TouchableOpacity>
+      {/* Botones de acción */}
+      <View style={styles.headerActions}>
+        {/* Notificaciones */}
+        <TouchableOpacity style={styles.notificationButton} onPress={handleNotifications}>
+          {stats.expiringSoon > 0 && (
+            <View style={styles.notificationBadge}>
+              <Text style={styles.notificationBadgeText}>{stats.expiringSoon}</Text>
+            </View>
+          )}
+          <Ionicons name="notifications-outline" size={24} color="#666" />
+        </TouchableOpacity>
+
+        {/* Botón Logout */}
+        <TouchableOpacity style={styles.logoutButton} onPress={logout}>
+          <Ionicons name="log-out-outline" size={24} color="#666" />
+        </TouchableOpacity>
+      </View>
     </View>
   );
+
+  const filterTicketsByStatus = (status: 'all' | 'active' | 'expiring' | 'expired') => {
+    // Aquí podrías navegar a una pantalla filtrada o actualizar el estado
+    // Por ahora, simplemente scroll a la lista de garantías
+    console.log('Filtrar por:', status);
+  };
 
   const renderStats = () => (
     <View style={styles.statsSection}>
@@ -127,44 +155,50 @@ export const DashboardScreen: React.FC = () => {
         <Text style={styles.statsTitle}>Resumen General</Text>
 
         <View style={styles.statsGrid}>
-          <View style={[styles.statCard, { backgroundColor: '#e3f2fd' }]}>
+          <TouchableOpacity
+            style={[styles.statCard, { backgroundColor: '#e3f2fd' }]}
+            onPress={() => filterTicketsByStatus('all')}
+            activeOpacity={0.7}
+          >
             <Ionicons name="receipt" size={28} color="#1976d2" />
             <Text style={[styles.statNumber, { color: '#1976d2' }]}>{stats.total}</Text>
             <Text style={styles.statLabel}>Tickets</Text>
-          </View>
+          </TouchableOpacity>
 
-          <View style={[styles.statCard, { backgroundColor: '#e8f5e9' }]}>
+          <TouchableOpacity
+            style={[styles.statCard, { backgroundColor: '#e8f5e9' }]}
+            onPress={() => filterTicketsByStatus('active')}
+            activeOpacity={0.7}
+          >
             <Ionicons name="shield-checkmark" size={28} color="#388e3c" />
             <Text style={[styles.statNumber, { color: '#388e3c' }]}>{stats.active}</Text>
             <Text style={styles.statLabel}>Activas</Text>
-          </View>
+          </TouchableOpacity>
 
-          <View style={[styles.statCard, { backgroundColor: '#fff3e0' }]}>
+          <TouchableOpacity
+            style={[styles.statCard, { backgroundColor: '#fff3e0' }]}
+            onPress={() => filterTicketsByStatus('expiring')}
+            activeOpacity={0.7}
+          >
             <Ionicons name="time" size={28} color="#f57c00" />
             <Text style={[styles.statNumber, { color: '#f57c00' }]}>{stats.expiringSoon}</Text>
             <Text style={styles.statLabel}>Por vencer</Text>
-          </View>
+          </TouchableOpacity>
 
-          <View style={[styles.statCard, { backgroundColor: '#ffebee' }]}>
+          <TouchableOpacity
+            style={[styles.statCard, { backgroundColor: '#ffebee' }]}
+            onPress={() => filterTicketsByStatus('expired')}
+            activeOpacity={0.7}
+          >
             <Ionicons name="alert-circle" size={28} color="#d32f2f" />
             <Text style={[styles.statNumber, { color: '#d32f2f' }]}>{stats.expired}</Text>
             <Text style={styles.statLabel}>Vencidas</Text>
-          </View>
+          </TouchableOpacity>
         </View>
       </View>
 
       {/* Panel de datos adicionales */}
       <View style={styles.additionalStatsPanel}>
-        <View style={styles.detailStatRow}>
-          <View style={styles.detailStatIcon}>
-            <Ionicons name="cash" size={24} color="#1a73e8" />
-          </View>
-          <View style={styles.detailStatInfo}>
-            <Text style={styles.detailStatLabel}>Total invertido</Text>
-            <Text style={styles.detailStatValue}>{stats.totalSpent.toFixed(2)} €</Text>
-          </View>
-        </View>
-
         <View style={styles.detailStatRow}>
           <View style={styles.detailStatIcon}>
             <Ionicons name="cube" size={24} color="#9333ea" />
@@ -184,20 +218,6 @@ export const DashboardScreen: React.FC = () => {
             <Text style={styles.detailStatValue}>{stats.storesCount}</Text>
           </View>
         </View>
-
-        {stats.total > 0 && (
-          <View style={styles.detailStatRow}>
-            <View style={styles.detailStatIcon}>
-              <Ionicons name="trending-up" size={24} color="#34a853" />
-            </View>
-            <View style={styles.detailStatInfo}>
-              <Text style={styles.detailStatLabel}>Gasto promedio por ticket</Text>
-              <Text style={styles.detailStatValue}>
-                {(stats.totalSpent / stats.total).toFixed(2)} €
-              </Text>
-            </View>
-          </View>
-        )}
       </View>
 
       {/* Alerta de garantías próximas a vencer */}
@@ -302,6 +322,33 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: 'bold',
     color: '#1a1a1a'
+  },
+  headerActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8
+  },
+  notificationButton: {
+    padding: 8,
+    position: 'relative'
+  },
+  notificationBadge: {
+    position: 'absolute',
+    top: 4,
+    right: 4,
+    backgroundColor: '#ea4335',
+    borderRadius: 10,
+    minWidth: 18,
+    height: 18,
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 1
+  },
+  notificationBadgeText: {
+    color: '#fff',
+    fontSize: 10,
+    fontWeight: 'bold',
+    paddingHorizontal: 4
   },
   logoutButton: {
     padding: 8

@@ -35,12 +35,13 @@ export const TicketDetailScreen: React.FC = () => {
     days: 0,
     hours: 0,
     minutes: 0,
+    seconds: 0,
     isExpired: false
   });
 
   useEffect(() => {
     calculateTimeRemaining();
-    const interval = setInterval(calculateTimeRemaining, 60000); // Actualizar cada minuto
+    const interval = setInterval(calculateTimeRemaining, 1000); // Actualizar cada segundo
     return () => clearInterval(interval);
   }, []);
 
@@ -56,6 +57,7 @@ export const TicketDetailScreen: React.FC = () => {
         days: 0,
         hours: 0,
         minutes: 0,
+        seconds: 0,
         isExpired: true
       });
       return;
@@ -71,6 +73,7 @@ export const TicketDetailScreen: React.FC = () => {
     const days = totalDays % 30;
     const hours = totalHours % 24;
     const minutes = totalMinutes % 60;
+    const seconds = totalSeconds % 60;
 
     setTimeRemaining({
       years,
@@ -78,8 +81,29 @@ export const TicketDetailScreen: React.FC = () => {
       days,
       hours,
       minutes,
+      seconds,
       isExpired: false
     });
+  };
+
+  const handleExtendWarranty = () => {
+    Alert.alert(
+      'Extender Garantía',
+      '¿Deseas extender la garantía de este producto?\n\nEsto es una función premium que te permite contratar extensiones de garantía directamente desde la app.',
+      [
+        { text: 'Cancelar', style: 'cancel' },
+        {
+          text: 'Más información',
+          onPress: () => {
+            Alert.alert(
+              'Extensión de Garantía',
+              'Esta función te permitirá:\n\n• Comparar precios de extensiones\n• Contratar cobertura adicional\n• Recibir alertas antes de vencimiento\n• Gestionar todas tus garantías\n\nPróximamente disponible.',
+              [{ text: 'Entendido' }]
+            );
+          }
+        }
+      ]
+    );
   };
 
   const handleDelete = () => {
@@ -163,32 +187,48 @@ export const TicketDetailScreen: React.FC = () => {
           <Text style={styles.warrantyTitle}>Tiempo de Garantía Restante</Text>
 
           {!timeRemaining.isExpired ? (
-            <View style={styles.timerContainer}>
-              <View style={styles.timerBlock}>
-                <Text style={[styles.timerNumber, { color: getStatusColor() }]}>
-                  {timeRemaining.years}
-                </Text>
-                <Text style={styles.timerLabel}>Años</Text>
+            <>
+              <View style={styles.timerContainer}>
+                <View style={styles.timerBlock}>
+                  <Text style={[styles.timerNumber, { color: getStatusColor() }]}>
+                    {timeRemaining.years}
+                  </Text>
+                  <Text style={styles.timerLabel}>Años</Text>
+                </View>
+                <View style={styles.timerBlock}>
+                  <Text style={[styles.timerNumber, { color: getStatusColor() }]}>
+                    {timeRemaining.months}
+                  </Text>
+                  <Text style={styles.timerLabel}>Meses</Text>
+                </View>
+                <View style={styles.timerBlock}>
+                  <Text style={[styles.timerNumber, { color: getStatusColor() }]}>
+                    {timeRemaining.days}
+                  </Text>
+                  <Text style={styles.timerLabel}>Días</Text>
+                </View>
+                <View style={styles.timerBlock}>
+                  <Text style={[styles.timerNumber, { color: getStatusColor() }]}>
+                    {String(timeRemaining.hours).padStart(2, '0')}
+                  </Text>
+                  <Text style={styles.timerLabel}>Horas</Text>
+                </View>
               </View>
-              <View style={styles.timerBlock}>
-                <Text style={[styles.timerNumber, { color: getStatusColor() }]}>
-                  {timeRemaining.months}
-                </Text>
-                <Text style={styles.timerLabel}>Meses</Text>
+              <View style={styles.secondaryTimerContainer}>
+                <View style={styles.timerBlock}>
+                  <Text style={[styles.timerNumberSmall, { color: getStatusColor() }]}>
+                    {String(timeRemaining.minutes).padStart(2, '0')}
+                  </Text>
+                  <Text style={styles.timerLabelSmall}>Minutos</Text>
+                </View>
+                <View style={styles.timerBlock}>
+                  <Text style={[styles.timerNumberSmall, { color: getStatusColor() }]}>
+                    {String(timeRemaining.seconds).padStart(2, '0')}
+                  </Text>
+                  <Text style={styles.timerLabelSmall}>Segundos</Text>
+                </View>
               </View>
-              <View style={styles.timerBlock}>
-                <Text style={[styles.timerNumber, { color: getStatusColor() }]}>
-                  {timeRemaining.days}
-                </Text>
-                <Text style={styles.timerLabel}>Días</Text>
-              </View>
-              <View style={styles.timerBlock}>
-                <Text style={[styles.timerNumber, { color: getStatusColor() }]}>
-                  {timeRemaining.hours}
-                </Text>
-                <Text style={styles.timerLabel}>Horas</Text>
-              </View>
-            </View>
+            </>
           ) : (
             <View style={styles.expiredContainer}>
               <Ionicons name="alert-circle" size={48} color="#d32f2f" />
@@ -206,6 +246,19 @@ export const TicketDetailScreen: React.FC = () => {
               <Text style={styles.dateValue}>{formatDate(ticket.warrantyEndDate)}</Text>
             </View>
           </View>
+
+          {/* Botón de extender garantía */}
+          {!timeRemaining.isExpired && (
+            <TouchableOpacity
+              style={styles.extendWarrantyButton}
+              onPress={handleExtendWarranty}
+              activeOpacity={0.8}
+            >
+              <Ionicons name="shield-checkmark" size={20} color="#fff" />
+              <Text style={styles.extendWarrantyText}>Extender Garantía</Text>
+              <Ionicons name="arrow-forward" size={18} color="#fff" />
+            </TouchableOpacity>
+          )}
         </View>
 
         {/* Información del ticket */}
@@ -347,6 +400,12 @@ const styles = StyleSheet.create({
   timerContainer: {
     flexDirection: 'row',
     justifyContent: 'space-around',
+    marginBottom: 12
+  },
+  secondaryTimerContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    gap: 40,
     marginBottom: 20
   },
   timerBlock: {
@@ -356,10 +415,19 @@ const styles = StyleSheet.create({
     fontSize: 32,
     fontWeight: 'bold'
   },
+  timerNumberSmall: {
+    fontSize: 24,
+    fontWeight: 'bold'
+  },
   timerLabel: {
     fontSize: 12,
     color: '#666',
     marginTop: 4
+  },
+  timerLabelSmall: {
+    fontSize: 10,
+    color: '#666',
+    marginTop: 2
   },
   expiredContainer: {
     alignItems: 'center',
@@ -390,6 +458,24 @@ const styles = StyleSheet.create({
     fontWeight: '500',
     color: '#1a1a1a',
     marginTop: 4
+  },
+  extendWarrantyButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#1a73e8',
+    paddingVertical: 14,
+    paddingHorizontal: 20,
+    borderRadius: 12,
+    marginTop: 16,
+    gap: 8
+  },
+  extendWarrantyText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '600',
+    flex: 1,
+    textAlign: 'center'
   },
   infoCard: {
     backgroundColor: '#fff',
