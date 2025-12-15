@@ -14,6 +14,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../context/AuthContext';
 import { Ticket } from '../types';
 import { WarrantyCard } from '../components/WarrantyCard';
+import { NotificationDropdown } from '../components/NotificationDropdown';
 import { getMockTickets } from '../services/mockData';
 
 const { width } = Dimensions.get('window');
@@ -23,7 +24,10 @@ export const DashboardScreen: React.FC = () => {
   const navigation = useNavigation<any>();
   const { user, logout } = useAuth();
   const [tickets, setTickets] = useState<Ticket[]>([]);
+  const [allTickets, setAllTickets] = useState<Ticket[]>([]);
   const [refreshing, setRefreshing] = useState(false);
+  const [showNotifications, setShowNotifications] = useState(false);
+  const [activeFilter, setActiveFilter] = useState<'all' | 'active' | 'expiring' | 'expired'>('all');
   const [stats, setStats] = useState({
     total: 0,
     active: 0,
@@ -44,6 +48,7 @@ export const DashboardScreen: React.FC = () => {
     const sortedTickets = mockTickets.sort((a, b) =>
       new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
     );
+    setAllTickets(sortedTickets);
     setTickets(sortedTickets);
 
     // Calcular estadísticas
@@ -105,13 +110,28 @@ export const DashboardScreen: React.FC = () => {
     setRefreshing(false);
   };
 
-  const handleNotifications = () => {
-    // Mostrar notificaciones de garantías por vencer
-    Alert.alert(
-      'Notificaciones',
-      `Tienes ${stats.expiringSoon} garantía${stats.expiringSoon !== 1 ? 's' : ''} que vence${stats.expiringSoon !== 1 ? 'n' : ''} en los próximos 3 meses`,
-      [{ text: 'OK' }]
-    );
+  const getNotifications = () => {
+    const notifications: any[] = [];
+    const now = new Date();
+    const threeMonthsFromNow = new Date();
+    threeMonthsFromNow.setMonth(threeMonthsFromNow.getMonth() + 3);
+
+    tickets.forEach(ticket => {
+      const warrantyEnd = new Date(ticket.warrantyEndDate);
+      const daysRemaining = Math.ceil((warrantyEnd.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+
+      if (warrantyEnd > now && warrantyEnd < threeMonthsFromNow) {
+        notifications.push({
+          id: `warranty-${ticket.id}`,
+          type: daysRemaining <= 30 ? 'warning' : 'info',
+          title: `Garantía próxima a vencer`,
+          message: `${ticket.storeName} - ${ticket.products[0]?.name || 'Producto'} (${daysRemaining} días)`,
+          date: `Vence el ${warrantyEnd.toLocaleDateString('es-ES')}`
+        });
+      }
+    });
+
+    return notifications;
   };
 
   const renderHeader = () => (
@@ -125,7 +145,10 @@ export const DashboardScreen: React.FC = () => {
       {/* Botones de acción */}
       <View style={styles.headerActions}>
         {/* Notificaciones */}
-        <TouchableOpacity style={styles.notificationButton} onPress={handleNotifications}>
+        <TouchableOpacity
+          style={styles.notificationButton}
+          onPress={() => setShowNotifications(true)}
+        >
           {stats.expiringSoon > 0 && (
             <View style={styles.notificationBadge}>
               <Text style={styles.notificationBadgeText}>{stats.expiringSoon}</Text>
@@ -143,9 +166,33 @@ export const DashboardScreen: React.FC = () => {
   );
 
   const filterTicketsByStatus = (status: 'all' | 'active' | 'expiring' | 'expired') => {
-    // Aquí podrías navegar a una pantalla filtrada o actualizar el estado
-    // Por ahora, simplemente scroll a la lista de garantías
-    console.log('Filtrar por:', status);
+    setActiveFilter(status);
+
+    if (status === 'all') {
+      setTickets(allTickets);
+      return;
+    }
+
+    const now = new Date();
+    const threeMonthsFromNow = new Date();
+    threeMonthsFromNow.setMonth(threeMonthsFromNow.getMonth() + 3);
+
+    const filtered = allTickets.filter(ticket => {
+      const warrantyEnd = new Date(ticket.warrantyEndDate);
+
+      switch (status) {
+        case 'active':
+          return warrantyEnd > now;
+        case 'expiring':
+          return warrantyEnd > now && warrantyEnd < threeMonthsFromNow;
+        case 'expired':
+          return warrantyEnd <= now;
+        default:
+          return true;
+      }
+    });
+
+    setTickets(filtered);
   };
 
   const renderStats = () => (
@@ -293,6 +340,17 @@ export const DashboardScreen: React.FC = () => {
       >
         <Ionicons name="add" size={28} color="#fff" />
       </TouchableOpacity>
+
+      {/* Dropdown de notificaciones */}
+      <NotificationDropdown
+        visible={showNotifications}
+        notifications={getNotifications()}
+        onClose={() => setShowNotifications(false)}
+        onNotificationPress={(notification) => {
+          // Aquí podrías navegar al ticket específico
+          console.log('Notificación presionada:', notification);
+        }}
+      />
     </View>
   );
 };
