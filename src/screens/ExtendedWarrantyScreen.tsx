@@ -13,17 +13,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { ExtendedWarrantyService } from '../services/extendedWarrantyService';
 import { Ticket, WarrantyExtension, Product } from '../types';
 
-interface ExtendedWarrantyScreenProps {
-  route?: {
-    params?: {
-      ticket?: Ticket;
-      userId?: string;
-    };
-  };
-  navigation: any;
-}
-
-export const ExtendedWarrantyScreen: React.FC<ExtendedWarrantyScreenProps> = ({
+export const ExtendedWarrantyScreen: React.FC<any> = ({
   route,
   navigation
 }) => {

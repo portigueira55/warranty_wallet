@@ -12,16 +12,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { ResaleValueService } from '../services/resaleValueService';
 import { Ticket, ResaleValue } from '../types';
 
-interface ResaleValueScreenProps {
-  route: {
-    params: {
-      ticket: Ticket;
-    };
-  };
-  navigation: any;
-}
-
-export const ResaleValueScreen: React.FC<ResaleValueScreenProps> = ({
+export const ResaleValueScreen: React.FC<any> = ({
   route,
   navigation
 }) => {

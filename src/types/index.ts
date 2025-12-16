@@ -3,6 +3,7 @@
 export interface User {
   id: string;
   username: string;
+  name: string;
   email: string;
   role: 'admin' | 'user';
   tenantId: string;
@@ -39,9 +40,11 @@ export interface Product {
   id: string;
   sku: string;
   name: string;
+  brand?: string;
   quantity: number;
   unitPrice: number;
   totalPrice: number;
+  price?: number;
   // Nuevos campos
   serialNumber?: string;
   ean?: string;
@@ -115,26 +118,42 @@ export interface Manufacturer {
 export interface FamilyGroup {
   id: string;
   name: string;
+  description?: string;
   ownerId: string;
   members: FamilyMember[];
+  sharedWarranties?: string[];
   createdAt: string;
 }
 
 export interface FamilyMember {
   userId: string;
-  userName: string;
+  name: string;
+  email: string;
   role: 'owner' | 'admin' | 'member';
   joinedAt: string;
+  canAddWarranties?: boolean;
+  canViewWarranties?: boolean;
+  canEditWarranties?: boolean;
 }
 
 export interface WarrantyExtension {
   id: string;
   ticketId: string;
-  monthsExtended: number;
-  price: number;
+  productId: string;
   provider: string;
-  purchasedAt: string;
-  newEndDate: string;
+  providerId: string;
+  purchaseDate: string;
+  startDate: string;
+  endDate: string;
+  cost: number;
+  coverage: string[];
+  policyNumber: string;
+  status: 'active' | 'pending' | 'expired' | 'cancelled';
+  claimLimit: number | null;
+  claimsUsed: number;
+  terms?: string;
+  contactPhone?: string;
+  contactEmail?: string;
 }
 
 export interface ProductInfo {

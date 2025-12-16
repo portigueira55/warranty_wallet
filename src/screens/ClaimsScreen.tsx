@@ -14,17 +14,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { ClaimsService } from '../services/claimsService';
 import { WarrantyClaim, Ticket } from '../types';
 
-interface ClaimsScreenProps {
-  route?: {
-    params?: {
-      ticket?: Ticket;
-      userId: string;
-    };
-  };
-  navigation: any;
-}
-
-export const ClaimsScreen: React.FC<ClaimsScreenProps> = ({
+export const ClaimsScreen: React.FC<any> = ({
   route,
   navigation
 }) => {

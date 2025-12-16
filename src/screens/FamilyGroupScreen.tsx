@@ -14,16 +14,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { FamilyGroupService } from '../services/familyGroupService';
 import { FamilyGroup, FamilyMember, Ticket } from '../types';
 
-interface FamilyGroupScreenProps {
-  route: {
-    params: {
-      userId: string;
-    };
-  };
-  navigation: any;
-}
-
-export const FamilyGroupScreen: React.FC<FamilyGroupScreenProps> = ({
+export const FamilyGroupScreen: React.FC<any> = ({
   route,
   navigation
 }) => {

@@ -13,17 +13,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { TransferService } from '../services/transferService';
 import { User, Ticket } from '../types';
 
-interface TransferWarrantyScreenProps {
-  route: {
-    params: {
-      ticket: Ticket;
-      userId: string;
-    };
-  };
-  navigation: any;
-}
-
-export const TransferWarrantyScreen: React.FC<TransferWarrantyScreenProps> = ({
+export const TransferWarrantyScreen: React.FC<any> = ({
   route,
   navigation
 }) => {

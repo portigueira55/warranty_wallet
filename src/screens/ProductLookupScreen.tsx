@@ -14,11 +14,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { ProductLookupService } from '../services/productLookupService';
 import { ProductInfo } from '../types';
 
-interface ProductLookupScreenProps {
-  navigation: any;
-}
-
-export const ProductLookupScreen: React.FC<ProductLookupScreenProps> = ({
+export const ProductLookupScreen: React.FC<any> = ({
   navigation
 }) => {
   const [searchQuery, setSearchQuery] = useState('');

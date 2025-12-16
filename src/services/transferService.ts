@@ -16,7 +16,8 @@ export class TransferService {
     const mockUsers: User[] = [
       {
         id: 'user-2',
-        username: 'María García',
+        username: 'maria.garcia',
+        name: 'María García',
         email: 'maria@example.com',
         phone: '+34 600 123 456',
         role: 'user',
@@ -25,7 +26,8 @@ export class TransferService {
       },
       {
         id: 'user-3',
-        username: 'Juan Pérez',
+        username: 'juan.perez',
+        name: 'Juan Pérez',
         email: 'juan@example.com',
         phone: '+34 600 789 012',
         role: 'user',

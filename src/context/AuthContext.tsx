@@ -52,6 +52,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       const demoUser: User = {
         id: 'demo-user-id',
         username: 'demo',
+        name: 'Usuario Demo',
         email: 'demo@warrantywallet.com',
         role: 'user',
         tenantId: 'demo-tenant',
