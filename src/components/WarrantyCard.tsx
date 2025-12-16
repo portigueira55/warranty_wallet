@@ -195,12 +195,12 @@ const styles = StyleSheet.create({
   },
   imageContainer: {
     width: 100,
+    height: 140,
     position: 'relative'
   },
   thumbnail: {
     width: '100%',
-    height: '100%',
-    minHeight: 140
+    height: '100%'
   },
   placeholderContainer: {
     backgroundColor: '#f5f7fa',

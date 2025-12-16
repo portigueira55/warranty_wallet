@@ -91,7 +91,7 @@ export const StoresScreen: React.FC = () => {
           // Navegar a una vista de detalle de la tienda (podemos crearla después)
           // Por ahora, simplemente mostrar el primer ticket
           if (item.tickets.length > 0) {
-            navigation.navigate('TicketDetail', { ticketId: item.tickets[0].id });
+            navigation.navigate('TicketDetail', { ticket: item.tickets[0] });
           }
         }}
       >
