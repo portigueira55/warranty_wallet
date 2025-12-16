@@ -87,23 +87,7 @@ export const TicketDetailScreen: React.FC = () => {
   };
 
   const handleExtendWarranty = () => {
-    Alert.alert(
-      'Extender Garantía',
-      '¿Deseas extender la garantía de este producto?\n\nEsto es una función premium que te permite contratar extensiones de garantía directamente desde la app.',
-      [
-        { text: 'Cancelar', style: 'cancel' },
-        {
-          text: 'Más información',
-          onPress: () => {
-            Alert.alert(
-              'Extensión de Garantía',
-              'Esta función te permitirá:\n\n• Comparar precios de extensiones\n• Contratar cobertura adicional\n• Recibir alertas antes de vencimiento\n• Gestionar todas tus garantías\n\nPróximamente disponible.',
-              [{ text: 'Entendido' }]
-            );
-          }
-        }
-      ]
-    );
+    navigation.navigate('ExtendedWarranty', { ticket, userId: user?.id });
   };
 
   const handleDelete = () => {
@@ -316,6 +300,57 @@ export const TicketDetailScreen: React.FC = () => {
           <View style={styles.totalRow}>
             <Text style={styles.totalLabel}>Total</Text>
             <Text style={styles.totalValue}>{totalAmount.toFixed(2)}€</Text>
+          </View>
+        </View>
+
+        {/* Acciones Rápidas */}
+        <View style={styles.infoCard}>
+          <Text style={styles.cardTitle}>Acciones Rápidas</Text>
+
+          <View style={styles.actionsGrid}>
+            {/* Calcular Valor de Reventa */}
+            <TouchableOpacity
+              style={styles.actionCard}
+              onPress={() => navigation.navigate('ResaleValue', { ticket })}
+            >
+              <View style={[styles.actionIconContainer, { backgroundColor: '#e8f5e9' }]}>
+                <Ionicons name="pricetag" size={24} color="#4caf50" />
+              </View>
+              <Text style={styles.actionLabel}>Valor de Reventa</Text>
+            </TouchableOpacity>
+
+            {/* Transferir Garantía */}
+            <TouchableOpacity
+              style={styles.actionCard}
+              onPress={() => navigation.navigate('TransferWarranty', { ticket, userId: user?.id })}
+            >
+              <View style={[styles.actionIconContainer, { backgroundColor: '#e3f2fd' }]}>
+                <Ionicons name="swap-horizontal" size={24} color="#2196f3" />
+              </View>
+              <Text style={styles.actionLabel}>Transferir</Text>
+            </TouchableOpacity>
+
+            {/* Hacer Reclamo */}
+            <TouchableOpacity
+              style={styles.actionCard}
+              onPress={() => navigation.navigate('Claims', { ticket, userId: user?.id })}
+            >
+              <View style={[styles.actionIconContainer, { backgroundColor: '#fff3e0' }]}>
+                <Ionicons name="document-text" size={24} color="#ff9800" />
+              </View>
+              <Text style={styles.actionLabel}>Reclamo</Text>
+            </TouchableOpacity>
+
+            {/* Buscar Producto */}
+            <TouchableOpacity
+              style={styles.actionCard}
+              onPress={() => navigation.navigate('ProductLookup')}
+            >
+              <View style={[styles.actionIconContainer, { backgroundColor: '#f3e5f5' }]}>
+                <Ionicons name="search" size={24} color="#9c27b0" />
+              </View>
+              <Text style={styles.actionLabel}>Buscar Info</Text>
+            </TouchableOpacity>
           </View>
         </View>
 
@@ -587,5 +622,32 @@ const styles = StyleSheet.create({
   metaText: {
     fontSize: 12,
     color: '#999'
+  },
+  actionsGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 12
+  },
+  actionCard: {
+    flex: 1,
+    minWidth: '45%',
+    alignItems: 'center',
+    backgroundColor: '#f5f7fa',
+    padding: 16,
+    borderRadius: 12
+  },
+  actionIconContainer: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 8
+  },
+  actionLabel: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#1a1a1a',
+    textAlign: 'center'
   }
 });

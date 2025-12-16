@@ -6,6 +6,12 @@ import { LoginScreen } from '../screens/LoginScreen';
 import { MainTabs } from './MainTabs';
 import { AddTicketScreen } from '../screens/AddTicketScreen';
 import { TicketDetailScreen } from '../screens/TicketDetailScreen';
+import { TransferWarrantyScreen } from '../screens/TransferWarrantyScreen';
+import { ResaleValueScreen } from '../screens/ResaleValueScreen';
+import { ClaimsScreen } from '../screens/ClaimsScreen';
+import { ProductLookupScreen } from '../screens/ProductLookupScreen';
+import { FamilyGroupScreen } from '../screens/FamilyGroupScreen';
+import { ExtendedWarrantyScreen } from '../screens/ExtendedWarrantyScreen';
 import { View, ActivityIndicator, StyleSheet } from 'react-native';
 
 const Stack = createNativeStackNavigator();
@@ -30,6 +36,48 @@ const MainStack = () => (
     <Stack.Screen
       name="TicketDetail"
       component={TicketDetailScreen}
+      options={{
+        animation: 'slide_from_right'
+      }}
+    />
+    <Stack.Screen
+      name="TransferWarranty"
+      component={TransferWarrantyScreen}
+      options={{
+        animation: 'slide_from_right'
+      }}
+    />
+    <Stack.Screen
+      name="ResaleValue"
+      component={ResaleValueScreen}
+      options={{
+        animation: 'slide_from_right'
+      }}
+    />
+    <Stack.Screen
+      name="Claims"
+      component={ClaimsScreen}
+      options={{
+        animation: 'slide_from_right'
+      }}
+    />
+    <Stack.Screen
+      name="ProductLookup"
+      component={ProductLookupScreen}
+      options={{
+        animation: 'slide_from_right'
+      }}
+    />
+    <Stack.Screen
+      name="FamilyGroup"
+      component={FamilyGroupScreen}
+      options={{
+        animation: 'slide_from_right'
+      }}
+    />
+    <Stack.Screen
+      name="ExtendedWarranty"
+      component={ExtendedWarrantyScreen}
       options={{
         animation: 'slide_from_right'
       }}
