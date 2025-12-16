@@ -239,6 +239,8 @@ const NewClaimModal: React.FC<{
 }> = ({ visible, onClose, onSuccess, userId, initialTicket }) => {
   const [issueDescription, setIssueDescription] = useState('');
   const [creating, setCreating] = useState(false);
+  const [showSATOptions, setShowSATOptions] = useState(false);
+  const [createdClaim, setCreatedClaim] = useState<any>(null);
 
   const handleCreate = async () => {
     if (!issueDescription.trim()) {
@@ -255,11 +257,8 @@ const NewClaimModal: React.FC<{
         issueDescription
       );
 
-      Alert.alert(
-        'Reclamo creado',
-        `Tu reclamo ha sido registrado con el número ${claim.caseNumber}. Serás contactado pronto.`,
-        [{ text: 'OK', onPress: onSuccess }]
-      );
+      setCreatedClaim(claim);
+      setShowSATOptions(true);
     } catch (error) {
       Alert.alert('Error', 'No se pudo crear el reclamo');
     } finally {
@@ -267,48 +266,144 @@ const NewClaimModal: React.FC<{
     }
   };
 
+  const handleSATOption = (option: string) => {
+    Alert.alert(
+      'Confirmación',
+      `Has seleccionado: ${option}\n\nSe notificará al fabricante y recibirás instrucciones por email.`,
+      [
+        {
+          text: 'OK',
+          onPress: () => {
+            setShowSATOptions(false);
+            onSuccess();
+          }
+        }
+      ]
+    );
+  };
+
   return (
     <Modal visible={visible} animationType="slide" transparent>
       <View style={styles.modalOverlay}>
         <View style={styles.modalContent}>
           <View style={styles.modalHeader}>
-            <Text style={styles.modalTitle}>Nuevo Reclamo</Text>
+            <Text style={styles.modalTitle}>
+              {showSATOptions ? 'Opciones de Gestión' : 'Nueva Reclamación'}
+            </Text>
             <TouchableOpacity onPress={onClose}>
               <Ionicons name="close" size={24} color="#666" />
             </TouchableOpacity>
           </View>
 
-          <ScrollView style={styles.modalBody}>
-            <Text style={styles.inputLabel}>Describe el problema</Text>
-            <TextInput
-              style={styles.textArea}
-              placeholder="Ej: La pantalla dejó de funcionar, el producto no enciende, etc."
-              value={issueDescription}
-              onChangeText={setIssueDescription}
-              multiline
-              numberOfLines={6}
-              textAlignVertical="top"
-            />
+          {!showSATOptions ? (
+            <>
+              <ScrollView style={styles.modalBody}>
+                <Text style={styles.inputLabel}>Describe el problema</Text>
+                <TextInput
+                  style={styles.textArea}
+                  placeholder="Ej: La pantalla dejó de funcionar, el producto no enciende, etc."
+                  value={issueDescription}
+                  onChangeText={setIssueDescription}
+                  multiline
+                  numberOfLines={6}
+                  textAlignVertical="top"
+                />
 
-            <TouchableOpacity style={styles.uploadButton}>
-              <Ionicons name="camera" size={20} color="#1a73e8" />
-              <Text style={styles.uploadButtonText}>Agregar fotos/videos</Text>
-            </TouchableOpacity>
-          </ScrollView>
+                <TouchableOpacity style={styles.uploadButton}>
+                  <Ionicons name="camera" size={20} color="#1a73e8" />
+                  <Text style={styles.uploadButtonText}>Agregar fotos/videos</Text>
+                </TouchableOpacity>
+              </ScrollView>
 
-          <View style={styles.modalFooter}>
-            <TouchableOpacity
-              style={styles.createButton}
-              onPress={handleCreate}
-              disabled={creating}
-            >
-              {creating ? (
-                <ActivityIndicator size="small" color="#fff" />
-              ) : (
-                <Text style={styles.createButtonText}>Crear Reclamo</Text>
-              )}
-            </TouchableOpacity>
-          </View>
+              <View style={styles.modalFooter}>
+                <TouchableOpacity
+                  style={styles.createButton}
+                  onPress={handleCreate}
+                  disabled={creating}
+                >
+                  {creating ? (
+                    <ActivityIndicator size="small" color="#fff" />
+                  ) : (
+                    <Text style={styles.createButtonText}>Crear Reclamación</Text>
+                  )}
+                </TouchableOpacity>
+              </View>
+            </>
+          ) : (
+            <>
+              <ScrollView style={styles.modalBody}>
+                <View style={styles.successMessage}>
+                  <Ionicons name="checkmark-circle" size={64} color="#4caf50" />
+                  <Text style={styles.successTitle}>Reclamación creada</Text>
+                  <Text style={styles.successText}>
+                    Número de caso: {createdClaim?.caseNumber}
+                  </Text>
+                </View>
+
+                <Text style={styles.satOptionsTitle}>¿Qué deseas hacer?</Text>
+
+                <TouchableOpacity
+                  style={styles.satOptionButton}
+                  onPress={() => handleSATOption('Enviar a SAT')}
+                >
+                  <View style={[styles.satOptionIcon, { backgroundColor: '#e3f2fd' }]}>
+                    <Ionicons name="send" size={24} color="#2196f3" />
+                  </View>
+                  <View style={styles.satOptionContent}>
+                    <Text style={styles.satOptionTitle}>Enviar a SAT</Text>
+                    <Text style={styles.satOptionDescription}>
+                      El fabricante te enviará las instrucciones de envío
+                    </Text>
+                  </View>
+                  <Ionicons name="chevron-forward" size={24} color="#999" />
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={styles.satOptionButton}
+                  onPress={() => handleSATOption('Solicitar recogida')}
+                >
+                  <View style={[styles.satOptionIcon, { backgroundColor: '#fff3e0' }]}>
+                    <Ionicons name="cube" size={24} color="#ff9800" />
+                  </View>
+                  <View style={styles.satOptionContent}>
+                    <Text style={styles.satOptionTitle}>Solicitar recogida</Text>
+                    <Text style={styles.satOptionDescription}>
+                      El fabricante recogerá el producto en tu domicilio
+                    </Text>
+                  </View>
+                  <Ionicons name="chevron-forward" size={24} color="#999" />
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={styles.satOptionButton}
+                  onPress={() => handleSATOption('Avisar a SAT')}
+                >
+                  <View style={[styles.satOptionIcon, { backgroundColor: '#e8f5e9' }]}>
+                    <Ionicons name="notifications" size={24} color="#4caf50" />
+                  </View>
+                  <View style={styles.satOptionContent}>
+                    <Text style={styles.satOptionTitle}>Avisar a SAT</Text>
+                    <Text style={styles.satOptionDescription}>
+                      Notificar al servicio técnico del fabricante
+                    </Text>
+                  </View>
+                  <Ionicons name="chevron-forward" size={24} color="#999" />
+                </TouchableOpacity>
+              </ScrollView>
+
+              <View style={styles.modalFooter}>
+                <TouchableOpacity
+                  style={styles.closeButton}
+                  onPress={() => {
+                    setShowSATOptions(false);
+                    onSuccess();
+                  }}
+                >
+                  <Text style={styles.closeButtonText}>Cerrar</Text>
+                </TouchableOpacity>
+              </View>
+            </>
+          )}
         </View>
       </View>
     </Modal>
@@ -709,5 +804,58 @@ const styles = StyleSheet.create({
     color: '#1a1a1a',
     lineHeight: 20,
     fontStyle: 'italic'
+  },
+  successMessage: {
+    alignItems: 'center',
+    paddingVertical: 24,
+    marginBottom: 24
+  },
+  successTitle: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: '#4caf50',
+    marginTop: 16,
+    marginBottom: 8
+  },
+  successText: {
+    fontSize: 14,
+    color: '#666',
+    fontWeight: '600'
+  },
+  satOptionsTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#1a1a1a',
+    marginBottom: 16
+  },
+  satOptionButton: {
+    flexDirection: 'row',
+    backgroundColor: '#f5f7fa',
+    padding: 16,
+    borderRadius: 12,
+    alignItems: 'center',
+    marginBottom: 12
+  },
+  satOptionIcon: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 12
+  },
+  satOptionContent: {
+    flex: 1
+  },
+  satOptionTitle: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: '#1a1a1a',
+    marginBottom: 4
+  },
+  satOptionDescription: {
+    fontSize: 13,
+    color: '#666',
+    lineHeight: 18
   }
 });

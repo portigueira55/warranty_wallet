@@ -330,7 +330,7 @@ export const TicketDetailScreen: React.FC = () => {
               <Text style={styles.actionLabel}>Transferir</Text>
             </TouchableOpacity>
 
-            {/* Hacer Reclamo */}
+            {/* Hacer Reclamación */}
             <TouchableOpacity
               style={styles.actionCard}
               onPress={() => navigation.navigate('Claims', { ticket, userId: user?.id })}
@@ -338,7 +338,18 @@ export const TicketDetailScreen: React.FC = () => {
               <View style={[styles.actionIconContainer, { backgroundColor: '#fff3e0' }]}>
                 <Ionicons name="document-text" size={24} color="#ff9800" />
               </View>
-              <Text style={styles.actionLabel}>Reclamo</Text>
+              <Text style={styles.actionLabel}>Reclamación</Text>
+            </TouchableOpacity>
+
+            {/* Compartir con Familia */}
+            <TouchableOpacity
+              style={styles.actionCard}
+              onPress={() => navigation.navigate('FamilyGroup', { userId: user?.id })}
+            >
+              <View style={[styles.actionIconContainer, { backgroundColor: '#e8f5e9' }]}>
+                <Ionicons name="people" size={24} color="#4caf50" />
+              </View>
+              <Text style={styles.actionLabel}>Compartir</Text>
             </TouchableOpacity>
 
             {/* Buscar Producto */}
