@@ -115,7 +115,7 @@ export const createWarranty = async (req: AuthRequest, res: Response): Promise<v
         storeAddress: data.storeAddress,
         ticketNumber: data.ticketNumber,
         purchaseDate: new Date(data.purchaseDate),
-        purchaseTime: data.purchaseTime ? new Date(data.purchaseTime) : null,
+        purchaseTime: data.purchaseTime || null,
         totalAmount: data.totalAmount,
         ticketImageUrl: data.ticketImageUrl,
         items: {
@@ -245,8 +245,8 @@ export const createClaim = async (req: AuthRequest, res: Response): Promise<void
         manufacturerId: warrantyItem.product?.manufacturerId,
         issueDescription: data.issueDescription,
         caseNumber,
-        photos: data.photos ? JSON.parse(JSON.stringify(data.photos)) : null,
-        videos: data.videos ? JSON.parse(JSON.stringify(data.videos)) : null,
+        photos: data.photos ? JSON.stringify(data.photos) : null,
+        videos: data.videos ? JSON.stringify(data.videos) : null,
       },
       include: {
         warrantyItem: {

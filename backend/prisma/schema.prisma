@@ -6,8 +6,8 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider = "sqlite"
+  url      = "file:./dev.db"
 }
 
 // Usuarios de la app móvil
@@ -76,9 +76,9 @@ model Warranty {
   storeName       String?   @map("store_name")
   storeAddress    String?   @map("store_address")
   ticketNumber    String?   @map("ticket_number")
-  purchaseDate    DateTime  @map("purchase_date") @db.Date
-  purchaseTime    DateTime? @map("purchase_time") @db.Time
-  totalAmount     Decimal?  @map("total_amount") @db.Decimal(10, 2)
+  purchaseDate    DateTime  @map("purchase_date")
+  purchaseTime    String?   @map("purchase_time")
+  totalAmount     Float?    @map("total_amount")
   ticketImageUrl  String?   @map("ticket_image_url")
   createdAt       DateTime  @default(now()) @map("created_at")
   updatedAt       DateTime  @updatedAt @map("updated_at")
@@ -98,9 +98,9 @@ model WarrantyItem {
   sku             String?
   name            String
   quantity        Int      @default(1)
-  unitPrice       Decimal? @map("unit_price") @db.Decimal(10, 2)
-  totalPrice      Decimal? @map("total_price") @db.Decimal(10, 2)
-  warrantyEndDate DateTime @map("warranty_end_date") @db.Date
+  unitPrice       Float? @map("unit_price")
+  totalPrice      Float? @map("total_price")
+  warrantyEndDate DateTime @map("warranty_end_date")
   serialNumber    String?  @map("serial_number")
   status          String   @default("active") // active, expiring, expired, claimed
   createdAt       DateTime @default(now()) @map("created_at")
@@ -120,12 +120,12 @@ model WarrantyClaim {
   warrantyItemId        String    @map("warranty_item_id")
   userId                String    @map("user_id")
   manufacturerId        String?   @map("manufacturer_id")
-  issueDescription      String    @map("issue_description") @db.Text
+  issueDescription      String    @map("issue_description")
   caseNumber            String?   @map("case_number")
   status                String    @default("pending") // pending, in_progress, resolved, rejected
-  photos                Json?     // Array de URLs
-  videos                Json?     // Array de URLs
-  manufacturerResponse  String?   @map("manufacturer_response") @db.Text
+  photos                String?   // JSON string con array de URLs
+  videos                String?   // JSON string con array de URLs
+  manufacturerResponse  String?   @map("manufacturer_response")
   resolvedAt            DateTime? @map("resolved_at")
   createdAt             DateTime  @default(now()) @map("created_at")
   updatedAt             DateTime  @updatedAt @map("updated_at")
@@ -143,9 +143,9 @@ model WarrantyExtension {
   id              String   @id @default(uuid())
   warrantyItemId  String   @map("warranty_item_id")
   monthsExtended  Int      @map("months_extended")
-  price           Decimal? @db.Decimal(10, 2)
+  price           Float?
   purchasedAt     DateTime @default(now()) @map("purchased_at")
-  newEndDate      DateTime @map("new_end_date") @db.Date
+  newEndDate      DateTime @map("new_end_date")
 
   // Relaciones
   warrantyItem WarrantyItem @relation(fields: [warrantyItemId], references: [id])
@@ -159,7 +159,7 @@ model Notification {
   userId    String   @map("user_id")
   type      String   // warranty_expiring, claim_update, etc
   title     String
-  message   String   @db.Text
+  message   String
   read      Boolean  @default(false)
   createdAt DateTime @default(now()) @map("created_at")
 
