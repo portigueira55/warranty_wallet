@@ -1,0 +1,212 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Usuarios de la app móvil
+model User {
+  id            String   @id @default(uuid())
+  email         String   @unique
+  passwordHash  String   @map("password_hash")
+  username      String
+  phone         String?
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+  isActive      Boolean  @default(true) @map("is_active")
+
+  // Relaciones
+  warranties         Warranty[]
+  warrantyClaims     WarrantyClaim[]
+  notifications      Notification[]
+  createdFamilyGroups FamilyGroup[] @relation("CreatedGroups")
+  familyGroupMembers FamilyGroupMember[]
+
+  @@map("users")
+}
+
+// Fabricantes
+model Manufacturer {
+  id            String   @id @default(uuid())
+  name          String
+  email         String   @unique
+  passwordHash  String   @map("password_hash")
+  logoUrl       String?  @map("logo_url")
+  contactPhone  String?  @map("contact_phone")
+  supportEmail  String?  @map("support_email")
+  website       String?
+  createdAt     DateTime @default(now()) @map("created_at")
+  isActive      Boolean  @default(true) @map("is_active")
+
+  // Relaciones
+  products       Product[]
+  warrantyClaims WarrantyClaim[]
+
+  @@map("manufacturers")
+}
+
+// Productos/modelos
+model Product {
+  id                    String   @id @default(uuid())
+  manufacturerId        String   @map("manufacturer_id")
+  sku                   String   @unique
+  name                  String
+  category              String?
+  defaultWarrantyMonths Int      @default(36) @map("default_warranty_months")
+  imageUrl              String?  @map("image_url")
+  createdAt             DateTime @default(now()) @map("created_at")
+
+  // Relaciones
+  manufacturer   Manufacturer    @relation(fields: [manufacturerId], references: [id])
+  warrantyItems  WarrantyItem[]
+
+  @@map("products")
+}
+
+// Tickets/Garantías
+model Warranty {
+  id              String    @id @default(uuid())
+  userId          String    @map("user_id")
+  storeName       String?   @map("store_name")
+  storeAddress    String?   @map("store_address")
+  ticketNumber    String?   @map("ticket_number")
+  purchaseDate    DateTime  @map("purchase_date") @db.Date
+  purchaseTime    DateTime? @map("purchase_time") @db.Time
+  totalAmount     Decimal?  @map("total_amount") @db.Decimal(10, 2)
+  ticketImageUrl  String?   @map("ticket_image_url")
+  createdAt       DateTime  @default(now()) @map("created_at")
+  updatedAt       DateTime  @updatedAt @map("updated_at")
+
+  // Relaciones
+  user  User           @relation(fields: [userId], references: [id])
+  items WarrantyItem[]
+
+  @@map("warranties")
+}
+
+// Items de garantía (productos del ticket)
+model WarrantyItem {
+  id              String   @id @default(uuid())
+  warrantyId      String   @map("warranty_id")
+  productId       String?  @map("product_id")
+  sku             String?
+  name            String
+  quantity        Int      @default(1)
+  unitPrice       Decimal? @map("unit_price") @db.Decimal(10, 2)
+  totalPrice      Decimal? @map("total_price") @db.Decimal(10, 2)
+  warrantyEndDate DateTime @map("warranty_end_date") @db.Date
+  serialNumber    String?  @map("serial_number")
+  status          String   @default("active") // active, expiring, expired, claimed
+  createdAt       DateTime @default(now()) @map("created_at")
+
+  // Relaciones
+  warranty            Warranty              @relation(fields: [warrantyId], references: [id], onDelete: Cascade)
+  product             Product?              @relation(fields: [productId], references: [id])
+  warrantyClaims      WarrantyClaim[]
+  warrantyExtensions  WarrantyExtension[]
+
+  @@map("warranty_items")
+}
+
+// Reclamos de garantía
+model WarrantyClaim {
+  id                    String    @id @default(uuid())
+  warrantyItemId        String    @map("warranty_item_id")
+  userId                String    @map("user_id")
+  manufacturerId        String?   @map("manufacturer_id")
+  issueDescription      String    @map("issue_description") @db.Text
+  caseNumber            String?   @map("case_number")
+  status                String    @default("pending") // pending, in_progress, resolved, rejected
+  photos                Json?     // Array de URLs
+  videos                Json?     // Array de URLs
+  manufacturerResponse  String?   @map("manufacturer_response") @db.Text
+  resolvedAt            DateTime? @map("resolved_at")
+  createdAt             DateTime  @default(now()) @map("created_at")
+  updatedAt             DateTime  @updatedAt @map("updated_at")
+
+  // Relaciones
+  warrantyItem  WarrantyItem   @relation(fields: [warrantyItemId], references: [id])
+  user          User           @relation(fields: [userId], references: [id])
+  manufacturer  Manufacturer?  @relation(fields: [manufacturerId], references: [id])
+
+  @@map("warranty_claims")
+}
+
+// Extensiones de garantía
+model WarrantyExtension {
+  id              String   @id @default(uuid())
+  warrantyItemId  String   @map("warranty_item_id")
+  monthsExtended  Int      @map("months_extended")
+  price           Decimal? @db.Decimal(10, 2)
+  purchasedAt     DateTime @default(now()) @map("purchased_at")
+  newEndDate      DateTime @map("new_end_date") @db.Date
+
+  // Relaciones
+  warrantyItem WarrantyItem @relation(fields: [warrantyItemId], references: [id])
+
+  @@map("warranty_extensions")
+}
+
+// Notificaciones
+model Notification {
+  id        String   @id @default(uuid())
+  userId    String   @map("user_id")
+  type      String   // warranty_expiring, claim_update, etc
+  title     String
+  message   String   @db.Text
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now()) @map("created_at")
+
+  // Relaciones
+  user User @relation(fields: [userId], references: [id])
+
+  @@map("notifications")
+}
+
+// Grupos familiares
+model FamilyGroup {
+  id        String   @id @default(uuid())
+  name      String
+  createdBy String   @map("created_by")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  // Relaciones
+  creator User                @relation("CreatedGroups", fields: [createdBy], references: [id])
+  members FamilyGroupMember[]
+
+  @@map("family_groups")
+}
+
+// Miembros de grupos familiares
+model FamilyGroupMember {
+  id       String   @id @default(uuid())
+  groupId  String   @map("group_id")
+  userId   String   @map("user_id")
+  role     String   @default("member") // owner, admin, member
+  joinedAt DateTime @default(now()) @map("joined_at")
+
+  // Relaciones
+  group FamilyGroup @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  user  User        @relation(fields: [userId], references: [id])
+
+  @@map("family_group_members")
+}
+
+// Super admins
+model SuperAdmin {
+  id           String   @id @default(uuid())
+  email        String   @unique
+  passwordHash String   @map("password_hash")
+  name         String
+  role         String   @default("admin")
+  createdAt    DateTime @default(now()) @map("created_at")
+  isActive     Boolean  @default(true) @map("is_active")
+
+  @@map("super_admins")
+}
