@@ -1,40 +1,98 @@
-# Instrucciones para Windows PowerShell
+# ✅ Guía Completa - Warranty Wallet App
 
-## Paso 1: Limpiar dependencias
-```powershell
-Remove-Item -Recurse -Force node_modules -ErrorAction SilentlyContinue
-Remove-Item -Force package-lock.json -ErrorAction SilentlyContinue
+## 📁 Estructura del Proyecto
+Tu proyecto en `C:\Users\mario\APP CON IA\warranty_wallet` tiene:
+```
+warranty_wallet/           ← APP MÓVIL (raíz)
+├── App.tsx               ← Código principal
+├── package.json          ← Dependencias de Expo
+├── app.json              ← Configuración de Expo
+├── src/                  ← Código fuente app
+├── backend/              ← Backend API (Node.js)
+│   └── package.json      ← Dependencias del backend
+└── admin-panel/          ← Panel web admin
+    └── package.json      ← Dependencias del panel
 ```
 
-## Paso 2: Instalar dependencias
+## 🚀 Paso a Paso - Primera Vez
+
+### 1️⃣ Instalar dependencias de la APP MÓVIL
 ```powershell
+# Asegúrate de estar en: C:\Users\mario\APP CON IA\warranty_wallet
+cd "C:\Users\mario\APP CON IA\warranty_wallet"
+
+# Instalar
 npm install
 ```
 
-## Paso 3: Iniciar la app móvil
+### 2️⃣ Iniciar Expo
 ```powershell
 npx expo start
 ```
 
-## Paso 4: Abrir en tu dispositivo
-- Escanea el QR con la app Expo Go (Android/iOS)
-- O presiona 'w' para abrir en navegador web
-- O presiona 'a' para Android emulator
-- O presiona 'i' para iOS simulator
+### 3️⃣ **IMPORTANTE: Presiona 'w' para abrir en WEB**
+- ❌ NO uses el QR (no necesitas Expo Go)
+- ❌ NO uses 'a' para Android (necesita emulador instalado)
+- ✅ **Presiona 'w'** para abrir en tu navegador Chrome/Edge
 
-## Credenciales de prueba
-- Email: demo@warrantywallet.com
-- Password: password123
+### 4️⃣ Cuando se abra el navegador
+Verás la pantalla de login. Usa:
+- **Email:** demo@warrantywallet.com
+- **Password:** password123
 
-## Backend ya está corriendo en:
-http://localhost:3000
+## 🔧 Si tienes el backend en local
 
----
-
-## Si prefieres usar CMD en lugar de PowerShell:
-```cmd
-rmdir /s /q node_modules
-del package-lock.json
+### Backend (Puerto 3000)
+```powershell
+cd "C:\Users\mario\APP CON IA\warranty_wallet\backend"
 npm install
-npx expo start
+npm run dev
+```
+
+Debe mostrar: `✓ Server running on port 3000`
+
+## ❓ Preguntas Frecuentes
+
+**¿Necesito cuenta de Expo?**
+- NO para desarrollo local
+- Solo necesitas si vas a publicar la app
+
+**¿Por qué sale error de Android?**
+- Porque Expo intenta abrir Android automáticamente
+- Si no tienes emulador, ignora el error en rojo
+- Presiona 'w' para abrir en web
+
+**¿Dónde está configurada la API?**
+- En: `src/config/api.ts`
+- Ya apunta a `http://localhost:3000` ✅
+
+## 🌐 URLs importantes
+
+| Servicio | URL |
+|----------|-----|
+| App Web | http://localhost:8081 |
+| Backend API | http://localhost:3000 |
+| Backend Health | http://localhost:3000/health |
+| Admin Panel | http://localhost:5173 |
+
+## 🐛 Solución de Problemas
+
+**Error: "Unable to find expo"**
+```powershell
+Remove-Item -Recurse -Force node_modules
+npm install
+```
+
+**Error: PowerShell no reconoce rmdir /s /q**
+```powershell
+# Usa este comando en PowerShell:
+Remove-Item -Recurse -Force node_modules
+```
+
+**Backend no arranca**
+```powershell
+cd backend
+Remove-Item -Recurse -Force node_modules
+npm install
+npm run dev
 ```
