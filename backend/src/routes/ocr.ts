@@ -5,7 +5,7 @@
 import { Router } from 'express';
 import multer from 'multer';
 import { OCRController } from '../controllers/ocrController';
-import { authenticate } from '../middleware/auth';
+import { authenticateToken } from '../middleware/auth';
 
 const router = Router();
 
@@ -32,7 +32,7 @@ const upload = multer({
  */
 router.post(
   '/process',
-  authenticate,
+  authenticateToken,
   upload.single('image'),
   OCRController.processReceipt
 );
@@ -44,7 +44,7 @@ router.post(
  */
 router.post(
   '/extract-text',
-  authenticate,
+  authenticateToken,
   upload.single('image'),
   OCRController.extractText
 );
