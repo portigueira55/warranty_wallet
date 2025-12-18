@@ -9,6 +9,7 @@ import authRoutes from './routes/auth';
 import userRoutes from './routes/user';
 import manufacturerRoutes from './routes/manufacturer';
 import adminRoutes from './routes/admin';
+import ocrRoutes from './routes/ocr';
 
 const app: Application = express();
 
@@ -37,6 +38,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/user', userRoutes);
 app.use('/api/manufacturer', manufacturerRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/ocr', ocrRoutes);
 
 // Manejadores de errores
 app.use(notFoundHandler);

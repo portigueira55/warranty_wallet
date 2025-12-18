@@ -52,6 +52,12 @@ export const API_ENDPOINTS = {
     NOTIFICATIONS: '/api/user/notifications',
   },
 
+  // OCR
+  OCR: {
+    PROCESS: '/api/ocr/process',
+    EXTRACT_TEXT: '/api/ocr/extract-text',
+  },
+
   // Fabricante
   MANUFACTURER: {
     DASHBOARD: '/api/manufacturer/dashboard',
