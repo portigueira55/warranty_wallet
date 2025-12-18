@@ -44,8 +44,9 @@ app.use(errorHandler);
 
 // Iniciar servidor
 const PORT = config.port;
+const HOST = '0.0.0.0'; // Escuchar en todas las interfaces para Codespaces
 
-app.listen(PORT, () => {
+app.listen(PORT, HOST, () => {
   console.log(`
   ╔═══════════════════════════════════════╗
   ║  Warranty Wallet API Server          ║
