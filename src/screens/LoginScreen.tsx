@@ -23,18 +23,21 @@ export const LoginScreen: React.FC = () => {
   const [isRegistering, setIsRegistering] = useState(false);
   const [email, setEmail] = useState('');
 
-  const { login, register, isLoading } = useAuth();
+  const { login, register, isLoading, error } = useAuth();
 
   const handleLogin = async () => {
-    if (!username.trim() || !password.trim()) {
+    // En modo login, el campo "username" es realmente el email
+    const loginEmail = isRegistering ? email.trim() : username.trim();
+
+    if (!loginEmail || !password.trim()) {
       Alert.alert('Error', 'Por favor, completa todos los campos');
       return;
     }
 
-    const success = await login(username.trim(), password);
+    const success = await login(loginEmail, password);
 
     if (!success) {
-      Alert.alert('Error', 'Usuario o contraseña incorrectos');
+      Alert.alert('Error', error || 'Email o contraseña incorrectos');
     }
   };
 
@@ -73,34 +76,34 @@ export const LoginScreen: React.FC = () => {
 
         {/* Formulario */}
         <View style={styles.form}>
-          <View style={styles.inputContainer}>
-            <Ionicons name="person-outline" size={20} color="#666" style={styles.inputIcon} />
-            <TextInput
-              style={styles.input}
-              placeholder="Usuario"
-              placeholderTextColor="#999"
-              value={username}
-              onChangeText={setUsername}
-              autoCapitalize="none"
-              autoCorrect={false}
-            />
-          </View>
-
           {isRegistering && (
             <View style={styles.inputContainer}>
-              <Ionicons name="mail-outline" size={20} color="#666" style={styles.inputIcon} />
+              <Ionicons name="person-outline" size={20} color="#666" style={styles.inputIcon} />
               <TextInput
                 style={styles.input}
-                placeholder="Email"
+                placeholder="Usuario"
                 placeholderTextColor="#999"
-                value={email}
-                onChangeText={setEmail}
+                value={username}
+                onChangeText={setUsername}
                 autoCapitalize="none"
-                keyboardType="email-address"
                 autoCorrect={false}
               />
             </View>
           )}
+
+          <View style={styles.inputContainer}>
+            <Ionicons name="mail-outline" size={20} color="#666" style={styles.inputIcon} />
+            <TextInput
+              style={styles.input}
+              placeholder="Email"
+              placeholderTextColor="#999"
+              value={isRegistering ? email : username}
+              onChangeText={isRegistering ? setEmail : setUsername}
+              autoCapitalize="none"
+              keyboardType="email-address"
+              autoCorrect={false}
+            />
+          </View>
 
           <View style={styles.inputContainer}>
             <Ionicons name="lock-closed-outline" size={20} color="#666" style={styles.inputIcon} />

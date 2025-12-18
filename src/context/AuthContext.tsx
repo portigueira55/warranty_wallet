@@ -1,11 +1,12 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { User, AuthState } from '../types';
-import { AuthService } from '../services/auth';
+import { AuthApiService } from '../services/authApi';
 
 interface AuthContextType extends AuthState {
-  login: (username: string, password: string) => Promise<boolean>;
+  login: (email: string, password: string) => Promise<boolean>;
   logout: () => Promise<void>;
   register: (username: string, email: string, password: string) => Promise<boolean>;
+  error: string | null;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -20,6 +21,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     user: null,
     isLoading: true
   });
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     initializeAuth();
@@ -27,50 +29,39 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const initializeAuth = async () => {
     try {
-      // MODO DESARROLLO: Login automático con usuario demo
-      await AuthService.initializeDemoUser();
-      const user = await AuthService.checkSession();
+      // Verificar si hay sesión activa (token JWT guardado)
+      const user = await AuthApiService.checkSession();
 
-      // Si no hay sesión, crear usuario demo automáticamente
-      if (!user) {
-        const demoUser = await AuthService.login('demo', 'demo123');
-        setState({
-          isAuthenticated: true,
-          user: demoUser,
-          isLoading: false
-        });
-      } else {
+      if (user) {
         setState({
           isAuthenticated: true,
           user,
           isLoading: false
         });
+      } else {
+        // No hay sesión activa, mostrar pantalla de login
+        setState({
+          isAuthenticated: false,
+          user: null,
+          isLoading: false
+        });
       }
     } catch (error) {
       console.error('Error inicializando auth:', error);
-      // FALLBACK: Crear usuario demo directo
-      const demoUser: User = {
-        id: 'demo-user-id',
-        username: 'demo',
-        name: 'Usuario Demo',
-        email: 'demo@warrantywallet.com',
-        role: 'user',
-        tenantId: 'demo-tenant',
-        createdAt: new Date().toISOString()
-      };
       setState({
-        isAuthenticated: true,
-        user: demoUser,
+        isAuthenticated: false,
+        user: null,
         isLoading: false
       });
     }
   };
 
-  const login = async (username: string, password: string): Promise<boolean> => {
+  const login = async (email: string, password: string): Promise<boolean> => {
     try {
       setState(prev => ({ ...prev, isLoading: true }));
+      setError(null);
 
-      const user = await AuthService.login(username, password);
+      const user = await AuthApiService.login(email, password);
 
       if (user) {
         setState({
@@ -81,10 +72,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         return true;
       }
 
+      setError('Credenciales inválidas');
       setState(prev => ({ ...prev, isLoading: false }));
       return false;
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error en login:', error);
+      setError(error.message || 'Error al iniciar sesión');
       setState(prev => ({ ...prev, isLoading: false }));
       return false;
     }
@@ -92,12 +85,13 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const logout = async (): Promise<void> => {
     try {
-      await AuthService.logout();
+      await AuthApiService.logout();
       setState({
         isAuthenticated: false,
         user: null,
         isLoading: false
       });
+      setError(null);
     } catch (error) {
       console.error('Error en logout:', error);
     }
@@ -110,8 +104,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   ): Promise<boolean> => {
     try {
       setState(prev => ({ ...prev, isLoading: true }));
+      setError(null);
 
-      const user = await AuthService.register(username, email, password);
+      const user = await AuthApiService.register(username, email, password);
 
       if (user) {
         setState({
@@ -122,17 +117,19 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         return true;
       }
 
+      setError('Error al registrar usuario');
       setState(prev => ({ ...prev, isLoading: false }));
       return false;
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error en registro:', error);
+      setError(error.message || 'Error al registrar usuario');
       setState(prev => ({ ...prev, isLoading: false }));
       return false;
     }
   };
 
   return (
-    <AuthContext.Provider value={{ ...state, login, logout, register }}>
+    <AuthContext.Provider value={{ ...state, login, logout, register, error }}>
       {children}
     </AuthContext.Provider>
   );
