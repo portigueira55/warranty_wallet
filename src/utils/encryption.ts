@@ -20,7 +20,9 @@ export const deriveTenantKey = (tenantId: string): string => {
  */
 export const encryptData = (data: string, tenantId?: string): EncryptedData => {
   const key = tenantId ? deriveTenantKey(tenantId) : SECRET_KEY;
-  const iv = CryptoJS.lib.WordArray.random(16);
+  // Generar IV sin usar crypto.random
+  const ivStr = Math.random().toString(36).substring(2) + Math.random().toString(36).substring(2) + Date.now().toString(36);
+  const iv = CryptoJS.enc.Hex.parse(CryptoJS.SHA256(ivStr).toString().substring(0, 32));
 
   const encrypted = CryptoJS.AES.encrypt(data, key, {
     iv: iv,
@@ -59,7 +61,7 @@ export const decryptData = (encryptedData: EncryptedData, tenantId?: string): st
  * Hash de contraseña con SHA-256 y salt
  */
 export const hashPassword = (password: string, salt?: string): string => {
-  const passwordSalt = salt || CryptoJS.lib.WordArray.random(16).toString();
+  const passwordSalt = salt || (Math.random().toString(36) + Math.random().toString(36) + Date.now().toString(36));
   const hash = CryptoJS.SHA256(password + passwordSalt).toString();
   return `${passwordSalt}:${hash}`;
 };
@@ -75,16 +77,21 @@ export const verifyPassword = (password: string, hashedPassword: string): boolea
 
 /**
  * Genera un ID único cifrado para el tenant
+ * Usa timestamp + random para evitar dependencia de crypto nativo
  */
 export const generateTenantId = (): string => {
   const timestamp = Date.now().toString();
-  const random = CryptoJS.lib.WordArray.random(8).toString();
+  const random = Math.random().toString(36).substring(2) + Math.random().toString(36).substring(2);
   return CryptoJS.SHA256(timestamp + random).toString().substring(0, 32);
 };
 
 /**
  * Genera un ID único para tickets y productos
+ * Usa timestamp + random para evitar dependencia de crypto nativo
  */
 export const generateUniqueId = (): string => {
-  return CryptoJS.lib.WordArray.random(16).toString(CryptoJS.enc.Hex);
+  const timestamp = Date.now().toString(36);
+  const randomPart = Math.random().toString(36).substring(2, 15);
+  const randomPart2 = Math.random().toString(36).substring(2, 15);
+  return `${timestamp}-${randomPart}${randomPart2}`;
 };

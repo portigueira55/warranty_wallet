@@ -36,7 +36,10 @@ npm-debug.*
 *.tsbuildinfo
 
 # Android
-android/
+# android/ - COMMITED PARA EVITAR PREBUILD EN EAS
+android/build/
+android/.gradle/
+android/app/build/
 *.apk
 *.aab
 

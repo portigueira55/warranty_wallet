@@ -7,9 +7,9 @@
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "automatic",
     "splash": {
-      "image": "./assets/splash.png",
+      "image": "./assets/icon.png",
       "resizeMode": "contain",
-      "backgroundColor": "#1a73e8"
+      "backgroundColor": "#ffffff"
     },
     "assetBundlePatterns": [
       "**/*"
@@ -19,11 +19,11 @@
       "bundleIdentifier": "com.warrantywallet.app"
     },
     "android": {
+      "package": "com.warrantywallet.app",
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#1a73e8"
+        "backgroundColor": "#ffffff"
       },
-      "package": "com.warrantywallet.app",
       "permissions": [
         "android.permission.CAMERA",
         "android.permission.READ_EXTERNAL_STORAGE",
@@ -31,7 +31,6 @@
       ]
     },
     "web": {
-      "favicon": "./assets/favicon.png",
       "bundler": "metro"
     },
     "plugins": [
@@ -46,11 +45,15 @@
         {
           "photosPermission": "Permitir acceso a fotos para seleccionar tickets de compra."
         }
-      ]
+      ],
+      "expo-font"
     ],
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
     "extra": {
       "eas": {
-        "projectId": "warranty-wallet"
+        "projectId": "60062b77-c4c5-4611-a63c-23f4565b8d98"
       }
     }
   }

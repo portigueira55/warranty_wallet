@@ -36,6 +36,7 @@ export class AuthService {
       const adminUser: User = {
         id: userId,
         username: 'admin',
+        name: 'Administrador',
         email: 'admin@warrantywallet.com',
         role: 'admin',
         tenantId: tenantId,
@@ -139,6 +140,7 @@ export class AuthService {
       const newUser: User = {
         id: userId,
         username,
+        name: username,
         email,
         role: 'user',
         tenantId,

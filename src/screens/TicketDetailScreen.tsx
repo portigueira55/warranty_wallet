@@ -35,12 +35,13 @@ export const TicketDetailScreen: React.FC = () => {
     days: 0,
     hours: 0,
     minutes: 0,
+    seconds: 0,
     isExpired: false
   });
 
   useEffect(() => {
     calculateTimeRemaining();
-    const interval = setInterval(calculateTimeRemaining, 60000); // Actualizar cada minuto
+    const interval = setInterval(calculateTimeRemaining, 1000); // Actualizar cada segundo
     return () => clearInterval(interval);
   }, []);
 
@@ -56,6 +57,7 @@ export const TicketDetailScreen: React.FC = () => {
         days: 0,
         hours: 0,
         minutes: 0,
+        seconds: 0,
         isExpired: true
       });
       return;
@@ -71,6 +73,7 @@ export const TicketDetailScreen: React.FC = () => {
     const days = totalDays % 30;
     const hours = totalHours % 24;
     const minutes = totalMinutes % 60;
+    const seconds = totalSeconds % 60;
 
     setTimeRemaining({
       years,
@@ -78,8 +81,13 @@ export const TicketDetailScreen: React.FC = () => {
       days,
       hours,
       minutes,
+      seconds,
       isExpired: false
     });
+  };
+
+  const handleExtendWarranty = () => {
+    navigation.navigate('ExtendedWarranty', { ticket, userId: user?.id });
   };
 
   const handleDelete = () => {
@@ -163,32 +171,48 @@ export const TicketDetailScreen: React.FC = () => {
           <Text style={styles.warrantyTitle}>Tiempo de Garantía Restante</Text>
 
           {!timeRemaining.isExpired ? (
-            <View style={styles.timerContainer}>
-              <View style={styles.timerBlock}>
-                <Text style={[styles.timerNumber, { color: getStatusColor() }]}>
-                  {timeRemaining.years}
-                </Text>
-                <Text style={styles.timerLabel}>Años</Text>
+            <>
+              <View style={styles.timerContainer}>
+                <View style={styles.timerBlock}>
+                  <Text style={[styles.timerNumber, { color: getStatusColor() }]}>
+                    {timeRemaining.years}
+                  </Text>
+                  <Text style={styles.timerLabel}>Años</Text>
+                </View>
+                <View style={styles.timerBlock}>
+                  <Text style={[styles.timerNumber, { color: getStatusColor() }]}>
+                    {timeRemaining.months}
+                  </Text>
+                  <Text style={styles.timerLabel}>Meses</Text>
+                </View>
+                <View style={styles.timerBlock}>
+                  <Text style={[styles.timerNumber, { color: getStatusColor() }]}>
+                    {timeRemaining.days}
+                  </Text>
+                  <Text style={styles.timerLabel}>Días</Text>
+                </View>
+                <View style={styles.timerBlock}>
+                  <Text style={[styles.timerNumber, { color: getStatusColor() }]}>
+                    {String(timeRemaining.hours).padStart(2, '0')}
+                  </Text>
+                  <Text style={styles.timerLabel}>Horas</Text>
+                </View>
               </View>
-              <View style={styles.timerBlock}>
-                <Text style={[styles.timerNumber, { color: getStatusColor() }]}>
-                  {timeRemaining.months}
-                </Text>
-                <Text style={styles.timerLabel}>Meses</Text>
+              <View style={styles.secondaryTimerContainer}>
+                <View style={styles.timerBlock}>
+                  <Text style={[styles.timerNumberSmall, { color: getStatusColor() }]}>
+                    {String(timeRemaining.minutes).padStart(2, '0')}
+                  </Text>
+                  <Text style={styles.timerLabelSmall}>Minutos</Text>
+                </View>
+                <View style={styles.timerBlock}>
+                  <Text style={[styles.timerNumberSmall, { color: getStatusColor() }]}>
+                    {String(timeRemaining.seconds).padStart(2, '0')}
+                  </Text>
+                  <Text style={styles.timerLabelSmall}>Segundos</Text>
+                </View>
               </View>
-              <View style={styles.timerBlock}>
-                <Text style={[styles.timerNumber, { color: getStatusColor() }]}>
-                  {timeRemaining.days}
-                </Text>
-                <Text style={styles.timerLabel}>Días</Text>
-              </View>
-              <View style={styles.timerBlock}>
-                <Text style={[styles.timerNumber, { color: getStatusColor() }]}>
-                  {timeRemaining.hours}
-                </Text>
-                <Text style={styles.timerLabel}>Horas</Text>
-              </View>
-            </View>
+            </>
           ) : (
             <View style={styles.expiredContainer}>
               <Ionicons name="alert-circle" size={48} color="#d32f2f" />
@@ -206,6 +230,19 @@ export const TicketDetailScreen: React.FC = () => {
               <Text style={styles.dateValue}>{formatDate(ticket.warrantyEndDate)}</Text>
             </View>
           </View>
+
+          {/* Botón de extender garantía */}
+          {!timeRemaining.isExpired && (
+            <TouchableOpacity
+              style={styles.extendWarrantyButton}
+              onPress={handleExtendWarranty}
+              activeOpacity={0.8}
+            >
+              <Ionicons name="shield-checkmark" size={20} color="#fff" />
+              <Text style={styles.extendWarrantyText}>Extender Garantía</Text>
+              <Ionicons name="arrow-forward" size={18} color="#fff" />
+            </TouchableOpacity>
+          )}
         </View>
 
         {/* Información del ticket */}
@@ -263,6 +300,68 @@ export const TicketDetailScreen: React.FC = () => {
           <View style={styles.totalRow}>
             <Text style={styles.totalLabel}>Total</Text>
             <Text style={styles.totalValue}>{totalAmount.toFixed(2)}€</Text>
+          </View>
+        </View>
+
+        {/* Acciones Rápidas */}
+        <View style={styles.infoCard}>
+          <Text style={styles.cardTitle}>Acciones Rápidas</Text>
+
+          <View style={styles.actionsGrid}>
+            {/* Calcular Valor de Reventa */}
+            <TouchableOpacity
+              style={styles.actionCard}
+              onPress={() => navigation.navigate('ResaleValue', { ticket })}
+            >
+              <View style={[styles.actionIconContainer, { backgroundColor: '#e8f5e9' }]}>
+                <Ionicons name="pricetag" size={24} color="#4caf50" />
+              </View>
+              <Text style={styles.actionLabel}>Valor de Reventa</Text>
+            </TouchableOpacity>
+
+            {/* Transferir Garantía */}
+            <TouchableOpacity
+              style={styles.actionCard}
+              onPress={() => navigation.navigate('TransferWarranty', { ticket, userId: user?.id })}
+            >
+              <View style={[styles.actionIconContainer, { backgroundColor: '#e3f2fd' }]}>
+                <Ionicons name="swap-horizontal" size={24} color="#2196f3" />
+              </View>
+              <Text style={styles.actionLabel}>Transferir</Text>
+            </TouchableOpacity>
+
+            {/* Hacer Reclamación */}
+            <TouchableOpacity
+              style={styles.actionCard}
+              onPress={() => navigation.navigate('Claims', { ticket, userId: user?.id })}
+            >
+              <View style={[styles.actionIconContainer, { backgroundColor: '#fff3e0' }]}>
+                <Ionicons name="document-text" size={24} color="#ff9800" />
+              </View>
+              <Text style={styles.actionLabel}>Reclamación</Text>
+            </TouchableOpacity>
+
+            {/* Compartir con Familia */}
+            <TouchableOpacity
+              style={styles.actionCard}
+              onPress={() => navigation.navigate('FamilyGroup', { userId: user?.id })}
+            >
+              <View style={[styles.actionIconContainer, { backgroundColor: '#e8f5e9' }]}>
+                <Ionicons name="people" size={24} color="#4caf50" />
+              </View>
+              <Text style={styles.actionLabel}>Compartir</Text>
+            </TouchableOpacity>
+
+            {/* Buscar Producto */}
+            <TouchableOpacity
+              style={styles.actionCard}
+              onPress={() => navigation.navigate('ProductLookup')}
+            >
+              <View style={[styles.actionIconContainer, { backgroundColor: '#f3e5f5' }]}>
+                <Ionicons name="search" size={24} color="#9c27b0" />
+              </View>
+              <Text style={styles.actionLabel}>Buscar Info</Text>
+            </TouchableOpacity>
           </View>
         </View>
 
@@ -347,6 +446,12 @@ const styles = StyleSheet.create({
   timerContainer: {
     flexDirection: 'row',
     justifyContent: 'space-around',
+    marginBottom: 12
+  },
+  secondaryTimerContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    gap: 40,
     marginBottom: 20
   },
   timerBlock: {
@@ -356,10 +461,19 @@ const styles = StyleSheet.create({
     fontSize: 32,
     fontWeight: 'bold'
   },
+  timerNumberSmall: {
+    fontSize: 24,
+    fontWeight: 'bold'
+  },
   timerLabel: {
     fontSize: 12,
     color: '#666',
     marginTop: 4
+  },
+  timerLabelSmall: {
+    fontSize: 10,
+    color: '#666',
+    marginTop: 2
   },
   expiredContainer: {
     alignItems: 'center',
@@ -390,6 +504,24 @@ const styles = StyleSheet.create({
     fontWeight: '500',
     color: '#1a1a1a',
     marginTop: 4
+  },
+  extendWarrantyButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#1a73e8',
+    paddingVertical: 14,
+    paddingHorizontal: 20,
+    borderRadius: 12,
+    marginTop: 16,
+    gap: 8
+  },
+  extendWarrantyText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '600',
+    flex: 1,
+    textAlign: 'center'
   },
   infoCard: {
     backgroundColor: '#fff',
@@ -501,5 +633,32 @@ const styles = StyleSheet.create({
   metaText: {
     fontSize: 12,
     color: '#999'
+  },
+  actionsGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 12
+  },
+  actionCard: {
+    flex: 1,
+    minWidth: '45%',
+    alignItems: 'center',
+    backgroundColor: '#f5f7fa',
+    padding: 16,
+    borderRadius: 12
+  },
+  actionIconContainer: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 8
+  },
+  actionLabel: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#1a1a1a',
+    textAlign: 'center'
   }
 });
