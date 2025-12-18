@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Warranty Wallet - Admin Panel</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            margin-bottom: 30px;
+        }
+
+        h1 {
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            color: #666;
+        }
+
+        .login-container {
+            background: white;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            max-width: 400px;
+            margin: 50px auto;
+        }
+
+        .dashboard {
+            display: none;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .stat-value {
+            font-size: 36px;
+            font-weight: bold;
+            color: #667eea;
+            margin: 10px 0;
+        }
+
+        .stat-label {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .warranties-list {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .warranty-item {
+            padding: 20px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .warranty-item:last-child {
+            border-bottom: none;
+        }
+
+        .warranty-info h3 {
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .warranty-meta {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .status-badge {
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .status-active {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-expiring {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .status-expired {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        input, button {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        button {
+            background: #667eea;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background 0.3s;
+        }
+
+        button:hover {
+            background: #5568d3;
+        }
+
+        .logout-btn {
+            background: #dc3545;
+            max-width: 200px;
+            margin: 20px 0;
+        }
+
+        .logout-btn:hover {
+            background: #c82333;
+        }
+
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <!-- Login Form -->
+    <div id="loginContainer" class="login-container">
+        <h2 style="color: #667eea; margin-bottom: 20px;">Warranty Wallet Admin</h2>
+        <div id="loginError" class="error" style="display: none;"></div>
+        <input type="email" id="email" placeholder="Email" />
+        <input type="password" id="password" placeholder="Password" />
+        <button onclick="login()">Login</button>
+    </div>
+
+    <!-- Dashboard -->
+    <div id="dashboard" class="dashboard">
+        <div class="container">
+            <div class="header">
+                <h1>🛡️ Warranty Wallet</h1>
+                <p class="subtitle">Admin Panel - Gestión de Garantías</p>
+                <button class="logout-btn" onclick="logout()">Cerrar Sesión</button>
+            </div>
+
+            <!-- Stats Cards -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-label">Total Garantías</div>
+                    <div class="stat-value" id="totalWarranties">0</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Activas</div>
+                    <div class="stat-value" id="activeWarranties">0</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Por Vencer (30 días)</div>
+                    <div class="stat-value" id="expiringWarranties">0</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Valor Total Protegido</div>
+                    <div class="stat-value" id="totalValue">€0</div>
+                </div>
+            </div>
+
+            <!-- Warranties List -->
+            <div class="warranties-list">
+                <h2 style="margin-bottom: 20px; color: #333;">Tus Garantías</h2>
+                <div id="warrantiesList" class="loading">Cargando...</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = window.location.origin;
+        let token = localStorage.getItem('token');
+
+        if (token) {
+            showDashboard();
+        }
+
+        async function login() {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const errorDiv = document.getElementById('loginError');
+
+            try {
+                const response = await fetch(`${API_URL}/api/auth/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    token = data.token;
+                    localStorage.setItem('token', token);
+                    showDashboard();
+                } else {
+                    errorDiv.textContent = data.error || 'Login failed';
+                    errorDiv.style.display = 'block';
+                }
+            } catch (error) {
+                errorDiv.textContent = 'Connection error';
+                errorDiv.style.display = 'block';
+            }
+        }
+
+        function logout() {
+            localStorage.removeItem('token');
+            token = null;
+            document.getElementById('dashboard').style.display = 'none';
+            document.getElementById('loginContainer').style.display = 'block';
+        }
+
+        async function showDashboard() {
+            document.getElementById('loginContainer').style.display = 'none';
+            document.getElementById('dashboard').style.display = 'block';
+            await loadDashboardData();
+        }
+
+        async function loadDashboardData() {
+            try {
+                const statsResponse = await fetch(`${API_URL}/api/warranties/stats`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const statsData = await statsResponse.json();
+
+                if (statsData.stats) {
+                    document.getElementById('totalWarranties').textContent = statsData.stats.total || 0;
+                    document.getElementById('activeWarranties').textContent = statsData.stats.active || 0;
+                    document.getElementById('expiringWarranties').textContent = statsData.stats.expiring_soon || 0;
+                    document.getElementById('totalValue').textContent = `€${(statsData.stats.total_value || 0).toFixed(2)}`;
+                }
+
+                const warrantiesResponse = await fetch(`${API_URL}/api/warranties`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const warrantiesData = await warrantiesResponse.json();
+
+                displayWarranties(warrantiesData.warranties || []);
+            } catch (error) {
+                console.error('Error loading dashboard:', error);
+                document.getElementById('warrantiesList').innerHTML = '<p>Error cargando datos</p>';
+            }
+        }
+
+        function displayWarranties(warranties) {
+            const container = document.getElementById('warrantiesList');
+
+            if (warranties.length === 0) {
+                container.innerHTML = '<p>No hay garantías registradas</p>';
+                return;
+            }
+
+            container.innerHTML = warranties.map(warranty => {
+                const expiryDate = new Date(warranty.expiry_date);
+                const daysUntilExpiry = Math.ceil((expiryDate - new Date()) / (1000 * 60 * 60 * 24));
+                
+                let statusClass = 'status-active';
+                let statusText = 'Activa';
+                
+                if (warranty.status === 'expired' || daysUntilExpiry < 0) {
+                    statusClass = 'status-expired';
+                    statusText = 'Expirada';
+                } else if (daysUntilExpiry <= 30) {
+                    statusClass = 'status-expiring';
+                    statusText = `${daysUntilExpiry} días restantes`;
+                }
+
+                return `
+                    <div class="warranty-item">
+                        <div class="warranty-info">
+                            <h3>${warranty.product_name}</h3>
+                            <div class="warranty-meta">
+                                ${warranty.brand ? warranty.brand : ''} 
+                                ${warranty.model ? `- ${warranty.model}` : ''}<br>
+                                Comprado: ${new Date(warranty.purchase_date).toLocaleDateString()}<br>
+                                Expira: ${expiryDate.toLocaleDateString()}
+                                ${warranty.price ? `<br>Valor: €${warranty.price}` : ''}
+                            </div>
+                        </div>
+                        <span class="status-badge ${statusClass}">${statusText}</span>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('password')?.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') login();
+            });
+        });
+    </script>
+</body>
+</html>
