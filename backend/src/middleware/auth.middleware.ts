@@ -1,7 +1,8 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
+const JWT_SECRET: string = process.env.JWT_SECRET || 'your-secret-key';
+const JWT_EXPIRES_IN: string = process.env.JWT_EXPIRES_IN || '7d';
 
 export interface AuthRequest extends Request {
   userId?: number;
@@ -35,6 +36,6 @@ export const generateToken = (userId: number, email: string): string => {
   return jwt.sign(
     { userId, email },
     JWT_SECRET,
-    { expiresIn: process.env.JWT_EXPIRES_IN || '7d' }
+    { expiresIn: JWT_EXPIRES_IN } as jwt.SignOptions
   );
 };
