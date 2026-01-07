@@ -1,105 +1,132 @@
-# Warranty Wallet
+# 🔖 Warranty Wallet v2.0
 
-Aplicación móvil para gestionar garantías de productos. Sube fotos de tus tickets de compra y mantén un registro de todas tus garantías.
+> **PWA moderna** para gestionar todas tus garantías en un solo lugar. Nunca pierdas una garantía de nuevo con recordatorios inteligentes, OCR automático, y funcionalidad offline.
 
-## Características
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Node](https://img.shields.io/badge/node-%3E%3D20.0.0-brightgreen)](https://nodejs.org)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.7-blue)](https://www.typescriptlang.org/)
+[![React](https://img.shields.io/badge/React-18.3-61dafb)](https://reactjs.org/)
+[![PWA](https://img.shields.io/badge/PWA-Ready-5A0FC8)](https://web.dev/progressive-web-apps/)
 
-- **Login seguro** con datos cifrados (AES-256)
-- **Multi-tenant** con aislamiento de datos por usuario
-- **Captura de tickets** mediante cámara o galería
-- **OCR** para extracción automática de datos
-- **Temporizador de garantía** de 3 años con visualización en tiempo real
-- **Dashboard** con estadísticas de garantías activas, por vencer y expiradas
-- **Diseño responsive** para móviles y tablets
+---
 
-## Credenciales Demo
+## ✨ Features
 
-- **Usuario:** admin
-- **Contraseña:** 1234
+### 🎯 Core Features
 
-## Tecnologías
+- 📱 **Progressive Web App (PWA)** - Instalable en cualquier dispositivo
+- 📵 **Modo Offline Completo** - Funciona sin internet gracias a IndexedDB
+- 🔍 **OCR Inteligente** - Escanea recibos y extrae información automáticamente
+- 📊 **Analytics & Dashboard** - Visualiza estadísticas de tus garantías
+- 🔔 **Notificaciones Push** - Recordatorios cuando una garantía está por vencer
+- 📄 **Exportación a PDF** - Genera reportes profesionales
+- 🔐 **Autenticación Segura** - JWT + bcrypt
+- 🌙 **Dark Mode** - Tema oscuro/claro/automático
+- 🌍 **Multi-idioma** - Preparado para ES/EN
+- 🔍 **Búsqueda Avanzada** - Filtra por categoría, estado, y texto
 
-- React Native / Expo
-- TypeScript
-- Cifrado AES-256 (CryptoJS)
-- AsyncStorage para persistencia local
-- React Navigation
+### 🚀 Tech Highlights
 
-## Instalación
+- ⚡ **Ultra-rápido** - Vite + React 18 + SWC
+- 🎨 **UI Moderna** - TailwindCSS + componentes personalizados
+- 📦 **TypeScript** - Type-safe en frontend y backend
+- 🗄️ **PostgreSQL** - Base de datos robusta y escalable
+- 🐳 **Docker Ready** - Deploy en cualquier plataforma
+- ☁️ **Railway Optimized** - Deploy automático con un click
+
+---
+
+## 🚀 Quick Start
+
+### Requisitos Previos
+
+- Node.js >= 20.0.0
+- PostgreSQL 15+
+- npm >= 10.0.0
+
+### Instalación Local
 
 ```bash
-# Instalar dependencias
+# 1. Clonar repositorio
+git clone https://github.com/portigueira55/warranty_wallet.git
+cd warranty_wallet
+
+# 2. Setup Backend
+cd backend
 npm install
+cp .env.example .env
+# Editar .env con tu DATABASE_URL
+npm run dev
 
-# Iniciar en modo desarrollo
-npm start
-
-# Ejecutar en Android
-npm run android
-
-# Ejecutar en iOS
-npm run ios
+# 3. Setup Frontend (en otra terminal)
+cd frontend
+npm install
+cp .env.example .env
+# VITE_API_URL=http://localhost:3000/api
+npm run dev
 ```
 
-## Compilar APK
+Accede a:
+- **Frontend**: http://localhost:5173
+- **Backend API**: http://localhost:3000
+- **API Health**: http://localhost:3000/api/health
 
-### Con EAS Build (recomendado)
-```bash
-npm install -g eas-cli
-eas login
-eas build --platform android --profile apk
-```
+---
 
-### Compilación local
-```bash
-npx expo prebuild --platform android
-cd android
-./gradlew assembleRelease
-```
+## 📦 Stack Tecnológico
 
-El APK se generará en `android/app/build/outputs/apk/release/`
+### Frontend
+- React 18.3 + TypeScript 5.7
+- Vite 6.0 + TailwindCSS 3.4
+- TanStack Query 5.62 + Zustand 5.0
+- Dexie 4.0 (IndexedDB)
+- Tesseract.js 5.1 (OCR)
+- jsPDF 2.5 + Recharts 2.15
 
-## GitHub Actions
+### Backend
+- Node.js 20 + Express 4.21
+- PostgreSQL 15 + TypeScript 5.7
+- JWT + bcryptjs
+- Multer + node-cron
 
-El proyecto incluye un workflow de GitHub Actions que compila automáticamente la APK en cada push. La APK compilada estará disponible como artifact en la pestaña Actions.
+---
 
-## Estructura del Proyecto
+## 📚 Documentación
 
-```
-warranty_wallet/
-├── App.tsx                 # Punto de entrada
-├── src/
-│   ├── components/         # Componentes reutilizables
-│   │   └── WarrantyCard.tsx
-│   ├── context/            # Contextos de React
-│   │   └── AuthContext.tsx
-│   ├── navigation/         # Configuración de navegación
-│   │   └── AppNavigator.tsx
-│   ├── screens/            # Pantallas de la app
-│   │   ├── LoginScreen.tsx
-│   │   ├── DashboardScreen.tsx
-│   │   ├── AddTicketScreen.tsx
-│   │   └── TicketDetailScreen.tsx
-│   ├── services/           # Servicios y lógica de negocio
-│   │   ├── auth.ts
-│   │   ├── ocr.ts
-│   │   └── storage.ts
-│   ├── types/              # Definiciones de TypeScript
-│   │   └── index.ts
-│   └── utils/              # Utilidades
-│       └── encryption.ts
-├── assets/                 # Imágenes y recursos
-└── .github/workflows/      # CI/CD
-    └── build-android.yml
-```
+- **[📖 Guía del Desarrollador](./DEVELOPER_GUIDE.md)** - Arquitectura completa
+- **[🚀 Deploy en Railway](./RAILWAY_DEPLOY.md)** - Guía de producción
 
-## Seguridad
+---
 
-- Contraseñas hasheadas con SHA-256 + salt
-- Datos del usuario cifrados con AES-256
-- Cada usuario tiene su propio tenant ID para aislamiento de datos
-- Claves derivadas por tenant usando PBKDF2
+## 🚢 Deploy en Railway
 
-## Licencia
+1. Crear proyecto en [railway.app](https://railway.app)
+2. Connect GitHub repo
+3. Add PostgreSQL
+4. Configurar `JWT_SECRET`
+5. Deploy automático! 🎉
 
-MIT
+Ver: [RAILWAY_DEPLOY.md](./RAILWAY_DEPLOY.md)
+
+---
+
+## 🤝 Contribuir
+
+¡Las contribuciones son bienvenidas!
+
+1. Fork el proyecto
+2. Crea tu feature branch
+3. Commit con convención: `feat:`, `fix:`, `docs:`
+4. Push y crea Pull Request
+
+---
+
+## 📝 Licencia
+
+MIT License - ver [LICENSE](LICENSE)
+
+---
+
+**¡Nunca pierdas una garantía de nuevo! 🔖**
+
+Made with ❤️ and TypeScript

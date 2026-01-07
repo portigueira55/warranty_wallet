@@ -19,25 +19,42 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+// Serve admin panel
 app.use('/admin', express.static(path.join(__dirname, 'public')));
 
+// API routes
 app.use('/api/auth', authRoutes);
 app.use('/api/warranties', warrantyRoutes);
 app.use('/api/notifications', notificationRoutes);
 app.use('/api/transfer', transferRoutes);
 
-app.get('/', (req, res) => {
+// API health check
+app.get('/api/health', (req, res) => {
   res.json({
+    status: 'ok',
     message: 'Warranty Wallet API',
-    version: '1.0.0',
+    version: '2.0.0',
+    timestamp: new Date().toISOString(),
     endpoints: {
       auth: '/api/auth',
       warranties: '/api/warranties',
       notifications: '/api/notifications',
       transfer: '/api/transfer',
-      admin: '/admin'
     }
   });
+});
+
+// Serve PWA frontend (React app)
+const frontendPath = path.join(__dirname, '../../frontend/dist');
+app.use(express.static(frontendPath));
+
+// Handle client-side routing - send all non-API requests to index.html
+app.get('*', (req, res) => {
+  // Don't serve index.html for API routes
+  if (req.path.startsWith('/api/')) {
+    return res.status(404).json({ error: 'API endpoint not found' });
+  }
+  res.sendFile(path.join(frontendPath, 'index.html'));
 });
 
 app.use(errorHandler);
