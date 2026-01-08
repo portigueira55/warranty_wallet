@@ -94,11 +94,14 @@ Accede a:
 ## 📚 Documentación
 
 - **[📖 Guía del Desarrollador](./DEVELOPER_GUIDE.md)** - Arquitectura completa
-- **[🚀 Deploy en Railway](./RAILWAY_DEPLOY.md)** - Guía de producción
+- **[🚀 Deploy en Railway](./RAILWAY_DEPLOY.md)** - Deploy automático en Railway
+- **[🖥️ Deploy en VPS Hostinger](./HOSTINGER_VPS_DEPLOY.md)** - Guía completa paso a paso
 
 ---
 
-## 🚢 Deploy en Railway
+## 🚢 Deployment
+
+### Opción 1: Railway (Automático)
 
 1. Crear proyecto en [railway.app](https://railway.app)
 2. Connect GitHub repo
@@ -107,6 +110,17 @@ Accede a:
 5. Deploy automático! 🎉
 
 Ver: [RAILWAY_DEPLOY.md](./RAILWAY_DEPLOY.md)
+
+### Opción 2: VPS Hostinger (Manual)
+
+Guía completa desde cero para desplegar en tu VPS:
+- Configuración inicial del servidor
+- Instalación de Node.js, PostgreSQL, Nginx
+- Configuración SSL con Let's Encrypt
+- PM2 para mantener la app corriendo
+- Configuración de dominio
+
+Ver: [HOSTINGER_VPS_DEPLOY.md](./HOSTINGER_VPS_DEPLOY.md)
 
 ---
 
