@@ -111,16 +111,18 @@ Accede a:
 
 Ver: [RAILWAY_DEPLOY.md](./RAILWAY_DEPLOY.md)
 
-### Opción 2: VPS Hostinger (Manual)
+### Opción 2: VPS Hostinger
 
-Guía completa desde cero para desplegar en tu VPS:
-- Configuración inicial del servidor
-- Instalación de Node.js, PostgreSQL, Nginx
-- Configuración SSL con Let's Encrypt
+**Setup rápido (15 minutos)**: [QUICK_VPS_SETUP.md](./QUICK_VPS_SETUP.md) ⚡
+
+**Guía completa desde cero**: [HOSTINGER_VPS_DEPLOY.md](./HOSTINGER_VPS_DEPLOY.md) 📖
+
+Incluye:
+- Scripts automáticos SQL y Bash
+- Configuración de Node.js, PostgreSQL, Nginx
+- SSL con Let's Encrypt
 - PM2 para mantener la app corriendo
 - Configuración de dominio
-
-Ver: [HOSTINGER_VPS_DEPLOY.md](./HOSTINGER_VPS_DEPLOY.md)
 
 ---
 
